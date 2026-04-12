@@ -1,0 +1,23 @@
+{
+  "structures": {
+    "Verse-Chorus": "[Verse]\n{verse_1}\n\n[Chorus]\n{chorus}\n\n[Verse]\n{verse_2}\n\n[Chorus]\n{chorus}",
+    "Verse-Chorus-Bridge": "[Verse]\n{verse_1}\n\n[Chorus]\n{chorus}\n\n[Verse]\n{verse_2}\n\n[Chorus]\n{chorus}\n\n[Bridge]\n{bridge}\n\n[Chorus]\n{chorus}",
+    "Intro-Verse-Chorus-Outro": "[Intro: Atmospheric]\n\n[Verse]\n{verse_1}\n\n[Chorus: Anthemic]\n{chorus}\n\n[Verse]\n{verse_2}\n\n[Chorus: Anthemic]\n{chorus}\n\n[Outro]\n",
+    "EDM Structure": "[Intro: Atmospheric]\n\n[Build]\n\n[Drop]\n{chorus}\n\n[Breakdown]\n\n[Build]\n\n[Drop]\n{chorus}\n\n[Outro]\n",
+    "Minimal": "[Verse]\n{verse_1}\n\n[Chorus]\n{chorus}"
+  },
+  "placeholders": {
+    "Love/Uplifting": {
+      "verse_1": "Every morning starts with your light\nThe world feels right when you are near\nI chase the warmth of golden skies\nAnd find my home in your eyes",
+      "chorus": "We rise we fall we start again\nTogether we are more than just friends\nI'd cross the stars to find your hand\nForever yours is where I stand",
+      "verse_2": "The nights grow short when you are close\nI hold the moments that matter most\nYour voice the anchor in the storm\nIn your arms I am always home",
+      "bridge": "Nothing can shake us now\nWe've been through everything somehow\nStronger in every way\nI'd choose you any day"
+    },
+    "Dark/Hypnotic": {
+      "verse_1": "Beneath the surface something stirs\nA frequency the body learns\nThe beat descends the walls dissolve\nA puzzle no one needs to solve",
+      "chorus": "Sink into the rhythm now\nLet the current show you how\nLose the noise and find the core\nThis is what the dark is for",
+      "verse_2": "The signal hums through concrete veins\nA city breathing through the pain\nWe are the pulse we are the code\nA thousand lights along the road",
+      "bridge": "Can you feel it underground\nThe silent hum without a sound\nWe are the signal we are the wave\nBeyond the borders of the sane"
+    }
+  }
+}

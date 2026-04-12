@@ -1,0 +1,101 @@
+{
+  "categories": {
+    "Electronic/Synths": {
+      "Acid/Bass Synths": [
+        "TB-303 synth bass", "squelchy resonant filter", "distorted saw wave bass",
+        "Moog-style ladder filter", "4-pole resonant VCF", "detuned sawtooth bass"
+      ],
+      "Pads/Atmosphere": [
+        "layered analog pads", "lush wavetable pads", "granular textures",
+        "ambient textures", "detuned oscillator pads", "supersaw chord stabs"
+      ],
+      "Leads": [
+        "FM synth lead (Yamaha DX7)", "bitcrushed lead", "supersaw lead",
+        "distorted wavetable lead", "TB-303 silver box lead"
+      ],
+      "FM/Digital": [
+        "Yamaha DX7 textures", "glassy FM bells", "12-bit digital crunch",
+        "crystal-clear 6-operator synthesis", "aliasing artifacts"
+      ]
+    },
+    "Keys": {
+      "Electric Piano": [
+        "Rhodes Mark I", "Wurlitzer 200A", "barking tine sound",
+        "bell-like Rhodes resonance", "stereo tremolo keys", "saturated tube Rhodes"
+      ],
+      "Acoustic Piano": [
+        "grand piano", "upright piano", "prepared piano",
+        "piano (sustained, reverb-soaked)", "close-mic grand piano"
+      ],
+      "Organ": [
+        "Hammond B3", "Leslie speaker cabinet (fast rotation)", "Leslie (slow rotation)",
+        "drawbar organ", "percussive organ attack", "church pipe organ"
+      ],
+      "Other Keys": [
+        "clavinet", "lo-fi keys", "harpsichord"
+      ]
+    },
+    "Bass": {
+      "Electric Bass": [
+        "electric bass", "slap bass", "slap and pop bass", "picked bass attack",
+        "fretless bass", "flatwound strings (mellow bass)", "roundwound strings (bright bass)"
+      ],
+      "Synth Bass": [
+        "synth bass", "808 bass", "sub bass", "wobble bass", "sidechain synth bass"
+      ],
+      "Upright Bass": [
+        "upright bass", "pizzicato upright bass", "bowed upright bass"
+      ]
+    },
+    "Drums/Percussion": {
+      "Acoustic Drums": [
+        "acoustic drum kit", "brush drums", "acoustic drum kit (heavy)",
+        "acoustic drum kit (tight pocket)", "close-mic snare"
+      ],
+      "Electronic Drums": [
+        "electronic drums", "TR-808 kit", "TR-909 kit", "LinnDrum",
+        "808 hi-hat rolls", "double kick pedal", "programmed beats"
+      ],
+      "Percussion": [
+        "tribal percussion", "congas", "bongos", "shakers",
+        "hand percussion", "tambourine", "frame drum"
+      ]
+    },
+    "Guitars": {
+      "Electric Guitar": [
+        "distorted electric guitar", "clean electric guitar", "humbucker sustain",
+        "P-90 grit", "palm-muted chugging", "whammy bar dives", "rhythm guitar (muted)"
+      ],
+      "Acoustic Guitar": [
+        "dreadnought acoustic", "steel-string fingerstyle", "classical nylon string guitar",
+        "12-string acoustic", "banjo"
+      ]
+    },
+    "Strings": {
+      "Solo Strings": [
+        "violin solo", "cello", "viola", "sul ponticello (metallic)",
+        "sul tasto (soft flute-like)", "col legno", "pizzicato strings",
+        "heavy vibrato strings", "double stops"
+      ],
+      "Ensemble Strings": [
+        "string ensemble", "string quartet", "lush orchestral strings",
+        "tremolo strings", "staccato strings"
+      ]
+    },
+    "Woodwinds/Brass": {
+      "Woodwinds": [
+        "saxophone", "overblown saxophone", "breathy flute", "reedy oboe",
+        "double-reed bassoon", "flutter-tonguing flute", "clarinet"
+      ],
+      "Brass": [
+        "trumpet", "muted trumpet", "French horn", "trombone",
+        "horn section", "flugelhorn"
+      ]
+    }
+  },
+  "modifiers": {
+    "timbre": ["warm", "bright", "crisp", "muddy", "airy", "punchy", "lush", "raw", "polished", "gritty"],
+    "mic": ["close-mic", "room mics", "binaural / 3D spatial", "mono centered", "ambient"],
+    "mix": ["tape saturation (15 ips)", "vacuum tube distortion", "high dynamic range", "brickwall limited", "lo-fi aesthetic"]
+  }
+}

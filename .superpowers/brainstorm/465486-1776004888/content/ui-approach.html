@@ -1,0 +1,47 @@
+<h2>What kind of Python UI do you want?</h2>
+<p class="subtitle">This shapes the whole architecture — pick the approach that fits how you work</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Web App (Flask + HTML/CSS/JS)</h3>
+      <p>Runs locally in your browser. Rich UI with custom styling, tabs, panels. You already have HTML knowledge from the PDF scripts. Full dark-mode, slick design possible. No extra installs beyond Flask.</p>
+      <ul>
+        <li>✅ Best looking UI</li>
+        <li>✅ Works in any browser</li>
+        <li>✅ Easy to extend later</li>
+        <li>⚠️ Slightly more code to wire up</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Gradio App</h3>
+      <p>Python-native ML UI framework — already used in ACE-Step's Gradio demo. Rapid to build, runs in browser. Great for dropdowns, text areas, tabs. Familiar if you've used ACE-Step standalone.</p>
+      <ul>
+        <li>✅ Very fast to build</li>
+        <li>✅ ML community standard</li>
+        <li>✅ Clean tabbed layout out of the box</li>
+        <li>⚠️ Less visual flexibility than custom HTML</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>PyQt6 Desktop App</h3>
+      <p>Native desktop window — no browser needed. Full control, offline, resizable panels. More traditional GUI feel with menus, toolbars, rich text editors.</p>
+      <ul>
+        <li>✅ True standalone desktop app</li>
+        <li>✅ No browser dependency</li>
+        <li>✅ Best for complex editors</li>
+        <li>⚠️ More complex to build</li>
+        <li>⚠️ Heavier install (Qt)</li>
+      </ul>
+    </div>
+  </div>
+</div>

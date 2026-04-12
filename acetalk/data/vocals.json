@@ -1,0 +1,73 @@
+{
+  "artists": [
+    {
+      "name": "Billie Eilish",
+      "range": "Alto (A3\u2013A5)",
+      "preferred_key": "C minor",
+      "style": "Pop/Indie",
+      "known_for": [
+        "bad guy",
+        "Happier Than Ever",
+        "Ocean Eyes"
+      ],
+      "ace_step_descriptors": [
+        "breathy female vocal",
+        "whispery",
+        "intimate",
+        "soft",
+        "close-mic vocal",
+        "airy",
+        "understated delivery"
+      ]
+    },
+    {
+      "name": "Freddie Mercury",
+      "range": "Tenor (A2\u2013F5)",
+      "preferred_key": "G Major",
+      "style": "Rock/Opera",
+      "known_for": [
+        "Bohemian Rhapsody",
+        "We Will Rock You",
+        "Somebody to Love"
+      ],
+      "ace_step_descriptors": [
+        "powerful male vocal",
+        "operatic",
+        "belted",
+        "wide vibrato",
+        "dramatic",
+        "raw energy"
+      ]
+    },
+    {
+      "name": "Erykah Badu",
+      "range": "Mezzo-Soprano (G3\u2013C6)",
+      "preferred_key": "D minor",
+      "style": "Neo Soul/R&B",
+      "known_for": [
+        "On & On",
+        "Bag Lady",
+        "Tyrone"
+      ],
+      "ace_step_descriptors": [
+        "warm female vocal",
+        "soulful",
+        "melismatic",
+        "smooth",
+        "jazz-inflected",
+        "intimate"
+      ]
+    },
+    {
+      "name": "Amy Winehouse",
+      "range": "",
+      "preferred_key": "",
+      "style": "",
+      "known_for": [],
+      "ace_step_descriptors": [
+        "vocal"
+      ],
+      "_source": "ddg"
+    }
+  ]
+}

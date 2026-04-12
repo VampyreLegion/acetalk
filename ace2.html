@@ -1,0 +1,193 @@
+from weasyprint import HTML
+import base64
+
+# Define the HTML content for the ACE-Step 1.5 Technical Manual
+html_content = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+            background-color: #f4f7f9;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #333;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+        .header-bar {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 5px solid #3498db;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24pt;
+            letter-spacing: 1px;
+        }
+        h2 {
+            font-size: 16pt;
+            color: #2c3e50;
+            border-left: 5px solid #3498db;
+            padding-left: 10px;
+            margin-top: 30px;
+            page-break-after: avoid;
+        }
+        h3 {
+            font-size: 13pt;
+            color: #2980b9;
+            margin-top: 20px;
+            page-break-after: avoid;
+        }
+        p, li {
+            font-size: 10.5pt;
+        }
+        .section {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 9.5pt;
+        }
+        th {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            text-align: left;
+            padding: 8px;
+            border: 1px solid #bdc3c7;
+        }
+        td {
+            padding: 8px;
+            border: 1px solid #bdc3c7;
+            vertical-align: top;
+        }
+        .code-block {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f8f9fa;
+            border: 1px solid #e1e4e8;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 9pt;
+            color: #d63384;
+        }
+        .pro-tip {
+            border: 1px solid #3498db;
+            background-color: #eaf2f8;
+            padding: 10px;
+            font-style: italic;
+            border-radius: 4px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 8pt;
+            color: #7f8c8d;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-bar">
+    <h1>ACE-Step 1.5 Technical Manual</h1>
+    <p>Advanced Prompt Engineering & Engine Controls for ComfyUI</p>
+</div>
+
+<div class="section">
+    <h2>1. The Control Engine Architecture</h2>
+    <p>ACE-Step 1.5 utilizes a dual-channel input system. Unlike traditional audio AI, it uses <strong>Chain-of-Thought (CoT)</strong> reasoning to plan musical structure before the Diffusion Transformer (DiT) renders the audio.</p>
+    <ul>
+        <li><strong>Tags/Caption:</strong> Defines the <em>Sonic Identity</em> (Instruments, genre, mixing, and timbre).</li>
+        <li><strong>Lyrics/Performance:</strong> Defines the <em>Musical Structure</em> (Arrangement, energy shifts, and vocal phrasing).</li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2>2. Advanced Instrument Selection & Timbre</h2>
+    <p>The model responds best to specific technical descriptors rather than generic terms. Use the following vocabulary to "select" instruments and their qualities.</p>
+    
+    <h3>Synthesizers & Electronic</h3>
+    <table>
+        <tr><th>Target Sound</th><th>Technical Keyword Prompt</th></tr>
+        <tr><td>Modular/Eurorack</td><td>Generative modular sequence, complex FM synthesis, analog voltage-controlled filter sweep, resonant VCF.</td></tr>
+        <tr><td>Acid/Bass</td><td>TB-303 silver box, squelchy resonant filter, distorted saw wave, driving 303 bassline.</td></tr>
+        <tr><td>Pads/Atmosphere</td><td>Lush wavetable pads, granular textures, detuned oscillators, ethereal chorused synths.</td></tr>
+        <tr><td>Drums</td><td>TR-808 kick, vintage 909 percussion, bitcrushed electronic drums, crisp hi-hat transients.</td></tr>
+    </table>
+
+    <h3>Acoustic & Orchestral</h3>
+    <table>
+        <tr><th>Instrument</th><th>Performance & Material Keywords</th></tr>
+        <tr><td>Grand Piano</td><td>Concert grand, hammer action, felt piano (soft), bright pop piano, reverberant hall.</td></tr>
+        <tr><td>Guitars</td><td>Nylon-string fingerstyle, steel-string acoustic, overdriven tube amp, palm-muted electric.</td></tr>
+        <tr><td>Strings</td><td>Staccato violin section, legato cello solo, pizzicato strings, cinematic orchestral swell.</td></tr>
+    </table>
+</div>
+
+<div class="section">
+    <h2>3. Structural "Engine" Commands</h2>
+    <p>These commands are placed inside brackets <strong>[...]</strong> within the <strong>Lyrics</strong> field. They trigger structural shifts in the generative engine.</p>
+    <table>
+        <tr><th>Command</th><th>Engine Response</th></tr>
+        <tr><td><code>[Intro]</code></td><td>Low intensity, focus on atmosphere or solo instrument lead-in.</td></tr>
+        <tr><td><code>[Build]</code></td><td>Increases drum density and adds rising pitch/frequency elements.</td></tr>
+        <tr><td><code>[Drop]</code></td><td>Maximum energy shift; engages heavy bass and full percussion.</td></tr>
+        <tr><td><code>[Verse]</code></td><td>Steady rhythm, pulls back melodic complexity to allow for vocals.</td></tr>
+        <tr><td><code>[Chorus]</code></td><td>Maximum melodic density; "anthemic" layering of instruments.</td></tr>
+        <tr><td><code>[Breakdown]</code></td><td>Sudden drop in instrumentation; focus on a single texture or vocal.</td></tr>
+        <tr><td><code>[Solo]</code></td><td>Triggers a lead melodic instrument (Guitar, Synth, or Piano) to take center stage.</td></tr>
+        <tr><td><code>[Outro]</code></td><td>Fades complexity; prepares the audio for a clean ending.</td></tr>
+    </table>
+</div>
+
+<div class="section">
+    <h2>4. Advanced Production & Mixing Tags</h2>
+    <p>Deep-research shows that including "Mastering" terms in the <strong>Caption</strong> field significantly improves the final output texture.</p>
+    <ul>
+        <li><strong>Spatiality:</strong> <code>Wide stereo field</code>, <code>binaural audio</code>, <code>intimate dry recording</code>, <code>massive room reverb</code>.</li>
+        <li><strong>Dynamics:</strong> <code>Sidechain compression</code> (for EDM), <code>brickwall limiter</code>, <code>high dynamic range</code>, <code>punchy transients</code>.</li>
+        <li><strong>Fidelity:</strong> <code>Studio quality (48kHz)</code>, <code>warm analog saturation</code>, <code>lo-fi tape hiss</code>, <code>bitcrushed</code>.</li>
+        <li><strong>Musical Theory:</strong> <code>120 BPM</code>, <code>4/4 time</code>, <code>Key of G Minor</code>, <code>Dorian mode</code>, <code>syncopated rhythm</code>.</li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2>5. The "Lego" & "Repaint" Workflow</h2>
+    <p>In ComfyUI, these task types allow for surgical control over an existing engine output.</p>
+    <p><strong>Lego Task:</strong> Use this to add a single layer. 
+    <br><span class="code-block">Prompt: "Add a layer of driving cello to the existing track"</span></p>
+    
+    <p><strong>Repaint Task:</strong> Use for changing a specific section. 
+    <br><span class="code-block">Input: repainting_start: 30, repainting_end: 45</span>
+    <br><em>Tip:</em> Ensure your caption describes ONLY the new sound for that specific window.</p>
+</div>
+
+<div class="pro-tip">
+    <strong>Pro-Tip:</strong> To generate a pure instrumental without vocal "hallucinations," use the tag <code>instrumental only</code> in the caption and leave the lyrics field completely empty.
+</div>
+
+<div class="footer">
+    ACE-Step 1.5 Technical Reference | Version 1.0 | 2026
+</div>
+
+</body>
+</html>
+"""
+
+# Export to PDF
+import os
+
+pdf_path = "ACE_Step_1_5_Manual.pdf"
+HTML(string=html_content).write_pdf(pdf_path)

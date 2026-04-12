@@ -1,0 +1,210 @@
+from weasyprint import HTML
+import os
+
+# Define the HTML content for the Command List and Markup Examples
+html_v3 = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 10mm;
+            background-color: #f1f5f9;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            color: #0f172a;
+            line-height: 1.3;
+            margin: 0;
+            padding: 0;
+        }
+        .page-break { page-break-after: always; }
+        .header {
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 20px;
+            border-bottom: 4px solid #0ea5e9;
+            margin-bottom: 20px;
+        }
+        h1 { margin: 0; font-size: 18pt; text-transform: uppercase; letter-spacing: 2px; }
+        h2 { 
+            font-size: 14pt; 
+            color: #0369a1; 
+            border-left: 4px solid #0ea5e9; 
+            padding-left: 10px; 
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .command-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 5px;
+        }
+        .tag {
+            background-color: #e2e8f0;
+            color: #334155;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'ui-monospace', 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+            font-size: 8.5pt;
+            border: 1px solid #cbd5e1;
+        }
+        .blueprint-box {
+            background-color: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .field-label {
+            font-weight: bold;
+            color: #0ea5e9;
+            font-size: 9pt;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .field-content {
+            background-color: #f8fafc;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'ui-monospace', monospace;
+            font-size: 9pt;
+            white-space: pre-wrap;
+            border: 1px solid #cbd5e1;
+            margin-bottom: 10px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 8pt;
+            color: #64748b;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-break">
+    <div class="header">
+        <h1>ACE-STEP 1.5 COMMAND LIST</h1>
+        <p style="margin:0; opacity:0.8;">Page 1: Technical Vocabulary Reference</p>
+    </div>
+
+    <div class="command-section">
+        <h2>Structure Tags (Lyrics Field)</h2>
+        <p>Place inside brackets [ ] to control the song's arrangement timeline.</p>
+        <div class="tag-list">
+            <span class="tag">[Intro]</span><span class="tag">[Build]</span><span class="tag">[Drop]</span>
+            <span class="tag">[Verse]</span><span class="tag">[Chorus]</span><span class="tag">[Bridge]</span>
+            <span class="tag">[Outro]</span><span class="tag">[Breakdown]</span><span class="tag">[Solo]</span>
+            <span class="tag">[Drum Fill]</span><span class="tag">[Guitar Solo]</span><span class="tag">[Instrumental Interlude]</span>
+            <span class="tag">[Silence]</span><span class="tag">[Fade Out]</span>
+        </div>
+        <h3 style="font-size: 10pt; margin-top:10px;">Performance Modifiers (inside brackets)</h3>
+        <div class="tag-list">
+            <span class="tag">:Virtuosic</span><span class="tag">:Anthemic</span><span class="tag">:Atmospheric</span>
+            <span class="tag">:Staccato</span><span class="tag">:Legato</span><span class="tag">:Heavy</span>
+            <span class="tag">:Sparse</span><span class="tag">:Modulated</span>
+        </div>
+    </div>
+
+    <div class="command-section">
+        <h2>Texture & Tone (Caption Field)</h2>
+        <p>Technical keywords to define the sonic hardware and mixing.</p>
+        <div class="tag-list">
+            <span class="tag">TB-303</span><span class="tag">808 Kick</span><span class="tag">909 Snare</span>
+            <span class="tag">Moog Ladder Filter</span><span class="tag">Buchla Wavefolder</span><span class="tag">FM Bells</span>
+            <span class="tag">Rhodes Mark I</span><span class="tag">Nylon-string</span><span class="tag">Sul Ponticello</span>
+            <span class="tag">Low-Pass Gate</span><span class="tag">PWM Modulation</span><span class="tag">Resonant VCF</span>
+        </div>
+        <h3 style="font-size: 10pt; margin-top:10px;">Production Engines</h3>
+        <div class="tag-list">
+            <span class="tag">Sidechain Compression</span><span class="tag">Brickwall Limited</span><span class="tag">Close-mic</span>
+            <span class="tag">Tape Saturation</span><span class="tag">Stereo Width</span><span class="tag">High Dynamic Range</span>
+            <span class="tag">Ambient Room Mics</span><span class="tag">Binaural Audio</span>
+        </div>
+    </div>
+
+    <div class="command-section">
+        <h2>Global Engine Overrides</h2>
+        <div class="tag-list">
+            <span class="tag">120 BPM</span><span class="tag">4/4 Time</span><span class="tag">Key of A Minor</span>
+            <span class="tag">Dorian Mode</span><span class="tag">Instrumental only</span><span class="tag">Pure Instrumental</span>
+            <span class="tag">Zero Vocal Presence</span><span class="tag">Non-vocal arrangement</span>
+        </div>
+    </div>
+</div>
+
+<div>
+    <div class="header">
+        <h1>MARKUP BLUEPRINTS</h1>
+        <p style="margin:0; opacity:0.8;">Page 2: Practical Implementation Examples</p>
+    </div>
+
+    <h2>1. The "Clean Generic" Markup</h2>
+    <div class="blueprint-box">
+        <span class="field-label">Caption / Tags</span>
+        <div class="field-content">Acoustic folk ballad, warm dreadnought guitar, fingerstyle technique, close-mic recording, intimate dry production, 90 bpm, key of G major, pure instrumental, zero vocal presence.</div>
+        
+        <span class="field-label">Lyrics Field</span>
+        <div class="field-content">[Intro: Sparse]
+[Verse: Staccato]
+[Verse: Legato]
+[Chorus: Anthemic]
+[Bridge: Modulated]
+[Chorus: Anthemic]
+[Outro: Fade Out]</div>
+    </div>
+
+    <h2>2. The "Psytrance" Technical Markup</h2>
+    <div class="blueprint-box">
+        <span class="field-label">Caption / Tags</span>
+        <div class="field-content">High-energy Psytrance, 145 bpm, rolling triplet bassline, squelchy resonant 303 acid lead, complex FM synthesis, Buchla wavefolding, wide stereo width, sidechain compression, 4/4 driving kick, crisp hi-hat transients, crystal-clear 48khz studio quality.</div>
+        
+        <span class="field-label">Lyrics Field</span>
+        <div class="field-content">[Intro: Atmospheric]
+[Build: Heavy]
+[Drop: Virtuosic]
+[Breakdown: Modulated]
+[Build: Heavy]
+[Drop: Anthemic]
+[Outro: Silence]</div>
+    </div>
+
+    <h2>3. The "Modern EDM" Markup</h2>
+    <div class="blueprint-box">
+        <span class="field-label">Caption / Tags</span>
+        <div class="field-content">Modern Future Bass, 128 bpm, lush supersaw pads, sidechain pumping effect, heavy 808 sub bass, bright pop piano chords, brickwall limited mastering, punchy transients, high-fidelity production, non-vocal arrangement.</div>
+        
+        <span class="field-label">Lyrics Field</span>
+        <div class="field-content">[Intro]
+[Verse]
+[Build]
+[Drop: Anthemic]
+[Chorus]
+[Solo: Virtuosic]
+[Outro: Fade Out]</div>
+    </div>
+
+    <div class="footer">
+        ACE-Step 1.5 Command Reference | Professional Printing Format
+    </div>
+</div>
+
+</body>
+</html>
+"""
+
+# Export the Final V3 PDF
+pdf_v3_path = "ACE_Step_1_5_Command_Reference_v3.pdf"
+HTML(string=html_v3).write_pdf(pdf_v3_path)
