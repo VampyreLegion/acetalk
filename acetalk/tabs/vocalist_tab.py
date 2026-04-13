@@ -141,3 +141,12 @@ class VocalistTab(QWidget):
         self.state.vocal_tags = selected
         self.selected_label.setText(", ".join(selected) if selected else "(none)")
         self.state_changed.emit()
+
+    def load_from_state(self):
+        """Check/uncheck chips to match state.vocal_tags (e.g. after Easy tab populates state)."""
+        for kw, chip in self._chips.items():
+            chip.blockSignals(True)
+            chip.setChecked(kw in self.state.vocal_tags)
+            chip.blockSignals(False)
+        tags = self.state.vocal_tags
+        self.selected_label.setText(", ".join(tags) if tags else "(none)")

@@ -198,3 +198,24 @@ class ParametersTab(QWidget):
         self.seed_spin.setValue(seed)
         self.seed_spin.blockSignals(False)
         self.state.seed = seed
+
+    def load_from_state(self):
+        """Sync all parameter widgets from state (e.g. after Easy tab populates state)."""
+        for w in (self.cfg_spin, self.temp_spin, self.top_p_spin, self.min_p_spin,
+                  self.top_k_spin, self.dur_spin, self.steps_spin,
+                  self.task_combo, self.seed_spin, self.lock_check):
+            w.blockSignals(True)
+        self.cfg_spin.setValue(self.state.cfg_scale)
+        self.temp_spin.setValue(self.state.temperature)
+        self.top_p_spin.setValue(self.state.top_p)
+        self.min_p_spin.setValue(self.state.min_p)
+        self.top_k_spin.setValue(self.state.top_k)
+        self.dur_spin.setValue(self.state.duration)
+        self.steps_spin.setValue(self.state.steps)
+        self.task_combo.setCurrentText(self.state.task_type)
+        self.seed_spin.setValue(self.state.seed)
+        self.lock_check.setChecked(self.state.lock_seed)
+        for w in (self.cfg_spin, self.temp_spin, self.top_p_spin, self.min_p_spin,
+                  self.top_k_spin, self.dur_spin, self.steps_spin,
+                  self.task_combo, self.seed_spin, self.lock_check):
+            w.blockSignals(False)

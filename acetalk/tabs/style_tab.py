@@ -230,3 +230,17 @@ class StyleTab(QWidget):
     def _on_time_changed(self, val):
         self.state.time_sig = val
         self.state_changed.emit()
+
+    def load_from_state(self):
+        """Sync all widgets from the current state (e.g. after Easy tab populates state)."""
+        for w in (self.bpm_spin, self.key_combo, self.scale_combo,
+                  self.mode_combo, self.time_combo):
+            w.blockSignals(True)
+        self.bpm_spin.setValue(self.state.bpm)
+        self.key_combo.setCurrentText(self.state.key)
+        self.scale_combo.setCurrentText(self.state.scale)
+        self.mode_combo.setCurrentText(self.state.mode)
+        self.time_combo.setCurrentText(self.state.time_sig)
+        for w in (self.bpm_spin, self.key_combo, self.scale_combo,
+                  self.mode_combo, self.time_combo):
+            w.blockSignals(False)

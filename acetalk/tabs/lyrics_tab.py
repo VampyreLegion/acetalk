@@ -234,3 +234,9 @@ class LyricsTab(QWidget):
     def _on_text_changed(self):
         self.state.lyrics = self.editor.toPlainText()
         self.state_changed.emit()
+
+    def load_from_state(self):
+        """Reload the lyrics editor from state (e.g. after Easy tab populates state)."""
+        self.editor.blockSignals(True)
+        self.editor.setPlainText(self.state.lyrics)
+        self.editor.blockSignals(False)

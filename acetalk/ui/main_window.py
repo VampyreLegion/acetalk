@@ -133,7 +133,7 @@ class MainWindow(QMainWindow):
 
         self.easy_tab = EasyTab(self.state, self.config)
         self.easy_tab.state_changed.connect(self.refresh_output)
-        self.easy_tab.go_to_overview.connect(lambda: self.tabs.setCurrentWidget(self.overview_tab))
+        self.easy_tab.go_to_overview.connect(self._on_easy_tab_applied)
         self.tabs.addTab(self.easy_tab, "Easy")
 
         self.style_tab = StyleTab(self.state)
@@ -162,6 +162,18 @@ class MainWindow(QMainWindow):
         settings_action = QAction("\u2699 Settings", self)
         settings_action.triggered.connect(self._open_settings)
         tb.addAction(settings_action)
+
+    def _on_easy_tab_applied(self):
+        """Called when Easy tab sends its generated result to session.
+        Refreshes all editing tabs so they reflect the new state, then switches to Overview."""
+        self.style_tab.load_from_state()
+        self.instrument_tab.load_from_state()
+        self.vocalist_tab.load_from_state()
+        self.lyrics_tab.load_from_state()
+        self.parameters_tab.load_from_state()
+        self.overview_tab.refresh()
+        self.refresh_output()
+        self.tabs.setCurrentWidget(self.overview_tab)
 
     def refresh_output(self):
         caption, lyrics = build_prompt(self.state)
