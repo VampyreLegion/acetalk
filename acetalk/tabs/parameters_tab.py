@@ -1,8 +1,10 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSlider,
-    QDoubleSpinBox, QSpinBox, QComboBox, QGroupBox
+    QDoubleSpinBox, QSpinBox, QComboBox, QGroupBox,
+    QPushButton, QCheckBox
 )
 from PyQt6.QtCore import pyqtSignal, Qt
+import random
 
 
 def _make_float_row(label: str, min_v: float, max_v: float, default: float,
@@ -137,9 +139,59 @@ class ParametersTab(QWidget):
         task_row.addStretch()
         layout.addLayout(task_row)
 
+        # Seed row
+        seed_row = QHBoxLayout()
+        seed_lbl = QLabel("Seed")
+        seed_lbl.setFixedWidth(120)
+        seed_lbl.setToolTip("Lock seed to reproduce the same generation and iterate with small changes.")
+        self.seed_spin = QSpinBox()
+        self.seed_spin.setRange(0, 2**31 - 1)
+        self.seed_spin.setValue(max(0, self.state.seed))
+        self.seed_spin.setFixedWidth(120)
+        self.seed_spin.setToolTip("Seed value used for generation.")
+        self.seed_spin.valueChanged.connect(self._on_seed_changed)
+
+        self.lock_check = QCheckBox("Lock seed (iterate on same base)")
+        self.lock_check.setChecked(self.state.lock_seed)
+        self.lock_check.setToolTip(
+            "Locked: reuse this seed every run — tweak tags/lyrics for variations on the same song.\n"
+            "Unlocked: new random seed each run — every generation is unique."
+        )
+        self.lock_check.stateChanged.connect(self._on_lock_changed)
+
+        self.btn_new_seed = QPushButton("New Random Seed")
+        self.btn_new_seed.setFixedWidth(130)
+        self.btn_new_seed.clicked.connect(self._randomize_seed)
+
+        seed_row.addWidget(seed_lbl)
+        seed_row.addWidget(self.seed_spin)
+        seed_row.addWidget(self.lock_check)
+        seed_row.addWidget(self.btn_new_seed)
+        seed_row.addStretch()
+        layout.addLayout(seed_row)
+
         root.addWidget(params_group)
         root.addStretch()
 
     def _update(self, field: str, value):
         setattr(self.state, field, value)
         self.state_changed.emit()
+
+    def _on_seed_changed(self, val: int):
+        self.state.seed = val
+        self.state_changed.emit()
+
+    def _on_lock_changed(self, state):
+        self.state.lock_seed = self.lock_check.isChecked()
+        self.state_changed.emit()
+
+    def _randomize_seed(self):
+        new_seed = random.randint(0, 2**31 - 1)
+        self.seed_spin.setValue(new_seed)   # triggers _on_seed_changed
+
+    def update_seed(self, seed: int):
+        """Called externally to display the seed that was actually used."""
+        self.seed_spin.blockSignals(True)
+        self.seed_spin.setValue(seed)
+        self.seed_spin.blockSignals(False)
+        self.state.seed = seed

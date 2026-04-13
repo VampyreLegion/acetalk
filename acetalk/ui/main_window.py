@@ -287,6 +287,9 @@ class MainWindow(QMainWindow):
         prompt_id = result.get("prompt_id", "")
         short_id  = prompt_id[:8] if prompt_id else "—"
 
+        # Update seed display in Parameters tab so user sees what was used
+        self.parameters_tab.update_seed(self.state.seed)
+
         # Auto-show the exact payload that was sent
         self._show_sent_payload(caption, lyrics, song_name, short_id)
 
@@ -304,7 +307,8 @@ class MainWindow(QMainWindow):
         dlg.setMinimumSize(700, 520)
         layout = QVBoxLayout(dlg)
 
-        header = QLabel(f"Job <b>{short_id}</b> queued. Exact inputs sent to TextEncodeAceStepAudio1.5:")
+        lock_str = f"  |  Seed: {self.state.seed} {'🔒 locked' if self.state.lock_seed else '(random)'}"
+        header = QLabel(f"Job <b>{short_id}</b> queued.{lock_str}")
         header.setStyleSheet("color: #4caf50; font-size: 11px; padding: 4px 0;")
         layout.addWidget(header)
 

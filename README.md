@@ -1,39 +1,45 @@
-# AceTalk — ACE-Step 1.5 Prompt Builder
+# AceTalk — ACE-Step 1.5 Music Composition Assistant
 
-A PyQt6 desktop application for crafting, assembling, and pushing ACE-Step 1.5 music generation prompts directly to a local ComfyUI instance. Instead of hand-writing text prompts, AceTalk gives you a structured interface backed by a library of ACE-Step-verified keywords, with live caption preview, a lyric generator, and one-click ComfyUI integration.
+A PyQt6 desktop application for composing, assembling, and generating music with ACE-Step 1.5 via ComfyUI. AceTalk gives you a structured interface backed by a library of 150 genres and ACE-Step-verified keywords, with live caption preview, AI lyric generation, web-based artist research, and one-click ComfyUI workflow queuing.
 
 ---
 
 ## What AceTalk Connects To
 
 ### ACE-Step 1.5
-The model AceTalk is built around. ACE-Step 1.5 is a music generation Diffusion Transformer that takes two text inputs:
+AceTalk is built around the ACE-Step 1.5 `TextEncodeAceStepAudio1.5` node, which takes two text inputs:
 
-- **Caption / Tags** — a comma-separated string of style keywords, BPM, key, scale, mode, instrument descriptors, and vocal style tags. This governs the genre, feel, instrumentation, and voice of the generated track.
-- **Lyrics** — structured song text with `[Section]` tags like `[Intro]`, `[Verse]`, `[Chorus]`, `[Bridge]`, `[Outro]`. The model reads these to plan song structure and render audio that matches the lyrics' phrasing and energy.
+- **Tags (Caption)** — comma-separated style keywords: genre, BPM, key, scale, mode, instrument descriptors, vocal style tags. Governs the genre, feel, instrumentation, and voice of the generated track.
+- **Lyrics** — structured song text with `[Section]` tags (`[Intro]`, `[Verse]`, `[Chorus]`, `[Bridge]`, `[Outro]`). The model reads these to plan song structure and render audio that matches the lyrics.
 
-AceTalk assembles both of these strings from your UI selections and writes them into ComfyUI in real time.
+AceTalk assembles both strings from your UI selections and writes them directly into ComfyUI.
 
 ### ComfyUI
-AceTalk connects to your running ComfyUI instance over HTTP (default `http://127.0.0.1:8188`). It can:
-- **Ping** the server every 30 seconds and show a green/red status indicator
-- **Fill Fields** — patch the ACE-Step caption and lyrics nodes in your currently loaded workflow
-- **Queue Workflow** — send a full workflow JSON to the `/prompt` endpoint to start generation immediately
+Connects over HTTP (configurable URL, default `http://127.0.0.1:8188`). AceTalk can:
+- **Ping** every 30 seconds — green/red status indicator in the output panel
+- **Queue Workflow** — fill a workflow template with your session data and POST to `/prompt`
+- **Auto-load workflow into the browser** — via the AceTalkBridge extension (see below)
+- **Monitor generation** — WebSocket monitor notifies you when generation completes
 
-You can install ACE-Step 1.5 as a ComfyUI custom node (it is available as a standalone node pack). AceTalk works with either version.
+### AceTalkBridge (ComfyUI Extension)
+A companion ComfyUI custom node included in `AceTalkBridge/`. After queuing, AceTalk pushes the filled workflow to ComfyUI's frontend so:
+- The `TextEncodeAceStepAudio1.5` node shows the actual tags and lyrics that were sent
+- Green node progress highlights appear during generation
+
+**Install:** copy or symlink `AceTalkBridge/` into ComfyUI's `custom_nodes/` folder, then restart ComfyUI.
+
+```bash
+cp -r AceTalkBridge/ /path/to/ComfyUI/custom_nodes/AceTalkBridge
+```
 
 ### Ollama
-For AI-assisted lyric generation. AceTalk polls `http://localhost:11434` on startup to get the list of available Ollama models. Any model you have installed will appear in the Lyrics tab's model selector. Generation is streamed token-by-token into the lyrics editor in real time.
-
-Ollama is optional — you can write lyrics manually, use templates, or skip lyrics entirely.
+AI lyric generation via `http://localhost:11434`. Any installed Ollama model appears in the Lyrics and Easy tab model selectors. Generation streams token-by-token. Supports `<think>...</think>` stripping for reasoning models (Qwen3, etc.). Optional — you can write lyrics manually.
 
 ### Brave Search / DuckDuckGo
-Used in the Vocals tab to research singers and vocal styles. When you search for an artist, AceTalk:
-1. Checks the local `acetalk/data/vocals.json` database first
-2. Falls back to Brave Search API if you have a key configured
-3. Falls back to DuckDuckGo (no key required) if Brave is unavailable or fails
-
-Web search results are automatically cached in `vocals.json` so subsequent searches for the same artist are instant and offline.
+Used in the Easy tab and Vocals tab to research bands and singers. Priority order:
+1. Local `vocals.json` database (instant, offline)
+2. Brave Search API (if key configured in Settings)
+3. DuckDuckGo fallback (no key required)
 
 ---
 
@@ -41,22 +47,39 @@ Web search results are automatically cached in `vocals.json` so subsequent searc
 
 ### Requirements
 - Python 3.10+
-- A running ComfyUI instance with ACE-Step 1.5 nodes loaded (for push features)
-- Ollama running locally (optional, for AI lyric generation)
-- Brave Search API key (optional, for vocalist web search)
+- Running ComfyUI instance with ACE-Step 1.5 nodes loaded
+- Ollama running locally (optional, for AI generation)
+- Brave Search API key (optional, for web research)
 
 ### Install Python dependencies
 
 ```bash
 cd AceUser
-pip install PyQt6 requests duckduckgo-search pytest pytest-qt
-```
-
-Or using the requirements file:
-
-```bash
 pip install -r requirements.txt
 ```
+
+Or manually:
+
+```bash
+pip install PyQt6 requests websocket-client mutagen ddgs pytest pytest-qt
+```
+
+### Install AceTalkBridge into ComfyUI
+
+```bash
+cp -r AceTalkBridge/ /path/to/ComfyUI/custom_nodes/AceTalkBridge
+# Restart ComfyUI
+```
+
+### Workflow Template
+
+AceTalk needs a ComfyUI workflow saved in API format to queue jobs:
+
+1. Build your ACE-Step workflow in ComfyUI
+2. Click the floppy icon → **Save (API format)**
+3. Save as `AceUser/workflow_template.json`
+
+A complete working template for ACE-Step 1.5 XL Turbo is included.
 
 ### Launch
 
@@ -69,283 +92,184 @@ python3 acetalk.py
 
 ## First-Time Setup
 
-On first launch, open **Settings** (gear icon in the toolbar, top-left):
+Open **Settings** (⚙ gear icon, top toolbar):
 
 | Field | Description |
 |---|---|
-| ComfyUI URL | URL of your running ComfyUI instance. Default: `http://127.0.0.1:8188` |
-| Brave API Key | Optional. Enables Brave Search for vocalist research. Leave blank to use DuckDuckGo only. |
+| ComfyUI URL | URL of your ComfyUI instance. Default: `http://127.0.0.1:8188` |
+| Ollama URL | URL of your Ollama instance. Default: `http://localhost:11434` |
+| Brave API Key | Optional. Enables Brave Search for artist research. |
 
-Click **Test ComfyUI** to verify the connection. Click **OK** to save — settings are written to `config.json` in the app directory.
-
----
-
-## How to Use
-
-The app has 5 tabs and a persistent output panel at the bottom. Work left-to-right through the tabs to build a complete prompt, then use the output panel to copy or send it to ComfyUI.
+Click **Test ComfyUI** to verify. Settings are saved to `config.json`.
 
 ---
 
-### Tab 1 — Style
+## Tabs
 
-Pick a genre from the grid. Clicking a genre card auto-fills:
-- **BPM** — a default BPM from the genre's typical range
-- **Key** — the genre's most common root key (e.g., A Minor for Psytrance)
-- **Scale** — e.g., Minor, Major, Phrygian, Dorian, Lydian
-- **Mode** — e.g., Phrygian (optional; only shown when meaningful)
-- **Time Signature** — almost always 4/4, but Jazz and Blues have variations
+### Overview
+A fully editable summary of the entire song. All fields from all tabs are shown on one screen — edit anything here and it propagates back immediately. Includes:
+- Style (genre, BPM, key, scale, mode, time signature)
+- Instruments list
+- Vocal tags
+- Lyrics editor
+- All generation parameters
+- Song metadata (title, artist, album, year, genres, description)
+- Read-only assembled caption (shows the final tags string in green)
 
-You can override any of these after selecting a genre. All edits update the live Caption preview at the bottom of the screen.
+### Easy
+Enter a **band/artist** and **vocalist**, optionally a topic, mood, subject, and name override. Click **Research + Generate**:
+1. Web-searches both the band and vocalist
+2. Sends results to Ollama with your guidance fields
+3. Receives a full ACE-Step caption + structured lyrics
+4. Parses the caption to extract genre, BPM, key, instruments, vocal tags
+5. Populates all tabs automatically and switches to Overview for review
 
-**Available genres:** Psytrance, EDM, House, Trance, Blues, Jazz, Neo Soul, Heavy Metal, Emo, Classical, Ambient, Lo-Fi, Folk, Cinematic
+Use Easy to get a complete starting point in one click.
 
-**How BPM, Key, and Scale get into the caption:**
-Style fields are only included in the caption when:
-- A genre has been selected (provides context), OR
-- The value differs from the default (120 BPM / C Major / 4/4)
+### Style
+Browse 150 genres organized into 17 parent categories (Alternative, Blues, Classical, Country, Dance, Electronic, Folk, Hip-Hop, Jazz, Latin, Metal, New Age, Pop, R&B/Soul, Reggae, Rock, World).
 
-This prevents the caption from being cluttered with defaults when you haven't chosen a style.
+- **Left sidebar** — select a category
+- **Right panel** — scrollable 4-column grid of genres in that category
+- **Search box** — filter by genre name, category, or tags across all 150 genres
 
----
+Clicking a genre auto-fills BPM, Key, Scale, Mode, and Time Signature. Description and typical instruments shown below.
 
-### Tab 2 — Instruments
+### Instruments
+Browse instrument categories on the left, click keyword chips to add them to your prompt. Each phrase is ACE-Step-compatible (e.g. "TB-303 synth bass", "Rhodes electric piano", "brushed drums").
 
-Browse instrument categories on the left, then click keyword chips on the right to add them to your prompt. Selected instruments appear in a list you can remove items from individually.
+### Vocals
+Search for a vocalist to pull ACE-Step-compatible vocal descriptors. Results are cached locally. Select vocal quality chips (tone, style, texture, gender) to build the vocal tag string.
 
-**Categories:**
-- Electronic/Synths (TB-303 bass, supersaw lead, wavetable pads, etc.)
-- Keys (grand piano, Rhodes, Hammond B3, Fender Rhodes, etc.)
-- Bass (electric bass, upright bass, synth bass, etc.)
-- Drums/Percussion (TR-909, TR-808, acoustic drum kit, brushed drums, congas, etc.)
-- Guitars (electric guitar, acoustic guitar, nylon string, slide guitar, etc.)
-- Strings (violin, cello, string ensemble, pizzicato strings, etc.)
-- Woodwinds/Brass (saxophone, trumpet, French horn, oboe, clarinet, etc.)
+### Lyrics
+Two modes:
 
-**Modifiers:** Add timbre, microphone, and mix descriptors (e.g., "warm", "distorted", "close-mic", "reverb-heavy") to fine-tune how ACE-Step renders the sound.
+**Template mode** — pick a song structure and theme to generate a structural scaffold with `[Section]` tags in place.
 
-All selected items are assembled into a comma-separated instrument string that flows directly into the caption.
+**Ollama mode** — AI-assisted lyric generation. Fields:
+- Model selector (auto-populated from running Ollama)
+- Topic / Mood
+- Subject (what or who the song is about)
+- Name override (force a specific character name into the lyrics)
+- Song structure selector
 
----
+Generation streams token-by-token. `<think>...</think>` blocks from reasoning models are stripped automatically. Use the `[Section]` tag toolbar to insert structural tags at the cursor.
 
-### Tab 3 — Vocals
+### Parameters
+Controls for the ACE-Step sampler. All fields have tooltips.
 
-Search for a vocalist or vocal style to pull ACE-Step-compatible descriptors.
+| Parameter | Default | Description |
+|---|---|---|
+| `cfg_scale` | 2.0 | Prompt adherence. ACE-Step XL Turbo default. |
+| `temperature` | 0.85 | Sampling randomness. |
+| `top_p` | 0.9 | Nucleus sampling cutoff. |
+| `top_k` | 0 | Top-K candidates (0 = disabled). |
+| `min_p` | 0.0 | Minimum probability threshold. |
+| `duration` | 120s | Generated audio length in seconds. |
+| `steps` | 8 | Diffusion steps. 8 is correct for the XL Turbo model. |
+| `task_type` | text2music | Generation mode. |
+| **Seed** | random | Seed for generation. |
+| **Lock seed** | off | Reuse seed every run for iterative refinement. |
 
-**Search sources:**
-- **Local** — search only the local `vocals.json` database (fast, offline)
-- **Web** — search only via Brave/DDG
-- **Both** (default) — check local first, fall back to web search
-
-When a result appears, click **Use These Descriptors** to pre-select the matching vocal chips in the picker below.
-
-**Vocal descriptor picker groups:**
-- **Tone:** breathy, raspy, smooth, nasal, powerful, clear
-- **Style:** whispered, belted, falsetto, spoken word, operatic
-- **Texture:** airy, gritty, warm, bright, vibrato, melismatic
-- **Gender:** male, female, androgynous
-
-Selected tags are added directly to the caption alongside your instrument string.
-
-**Adding artists to the local database:** Any artist found via web search is automatically saved to `acetalk/data/vocals.json`. You can also hand-edit that file to add detailed entries (preferred key, range, known hits, etc.) — see the Data Files section below.
-
----
-
-### Tab 4 — Lyrics
-
-Two modes, selectable at the top of the tab:
-
-#### Template Mode
-Pick a song structure, theme, and tone to generate a placeholder lyric scaffold:
-- **Structures:** Verse-Chorus, Verse-Chorus-Bridge, Verse-Pre-Chorus-Chorus, Through-Composed, Extended Club Edit
-- **Themes:** Love, Loss, Journey, Rebellion, Nature, Euphoria, Dark
-- The scaffold fills in the lyrics editor with correct `[Section]` tags in place
-
-Click **Apply Template** to generate. Edit the result freely.
-
-#### Ollama Mode
-Uses your local Ollama instance to write full lyrics:
-- Select a model from the dropdown (auto-populated from running Ollama)
-- Type a prompt describing what you want ("dark breakup song, hopeful ending")
-- Select a structure to guide the AI
-- Click **Generate** — lyrics stream in token by token
-
-The AI is automatically given your style context (genre, key, mood from the Style tab) as a system prompt prefix. The `[Section]` tags are part of the instruction so the output is ready for ACE-Step.
-
-#### Shared — Tag Toolbar
-Insert ACE-Step structural tags at the cursor with one click:
-
-`[Intro]` `[Verse]` `[Chorus]` `[Bridge]` `[Build]` `[Drop]` `[Breakdown]` `[Solo]` `[Outro]` `[Fade Out]` `[Silence]` `[Drum Break]` `[Guitar Solo]` `[Piano Interlude]`
-
-Qualifier variants: `[Chorus: Anthemic]` `[Intro: Atmospheric]` `[Solo: Virtuosic]` `[Bridge: Modulated]`
-
-The lyrics editor is always editable regardless of how the text was generated. What you see in the editor is exactly what gets sent to ACE-Step.
+#### Seed / Iterative Refinement
+- **Unlocked (default):** new random seed every run — every generation is unique
+- **Locked:** same seed every run — tweak tags, lyrics, or BPM to iterate on the same musical foundation
+- **New Random Seed button:** generate a fresh seed while staying locked
+- After each queue, the seed used is shown in the payload dialog and updated in the Parameters tab
 
 ---
 
-### Tab 5 — Parameters
+## Output Panel
 
-Controls for the ACE-Step sampler node. All parameters have tooltips explaining their effect.
+Always visible at the bottom of the window.
 
-| Parameter | Range | Default | What it controls |
-|---|---|---|---|
-| `cfg_scale` | 1.0–20.0 | 7.0 | Prompt adherence. Higher = closer to caption but less variety |
-| `temperature` | 0.1–2.0 | 1.0 | Randomness of token sampling. Higher = more creative, less stable |
-| `top_p` | 0.0–1.0 | 0.95 | Nucleus sampling threshold. Works with temperature |
-| `top_k` | 0–200 | 50 | Limits sampling to top K token candidates |
-| `min_p` | 0.0–1.0 | 0.05 | Minimum probability cutoff. Filters very low-probability tokens |
-| `duration` | 10–300s | 30 | Length of the generated audio in seconds |
-| `steps` | 10–150 | 60 | Diffusion steps. More = higher quality but slower |
-| `task_type` | — | text2music | Generation mode: `text2music`, `lego`, `repaint`, `extract` |
-
-Each float parameter has a linked slider and spinbox — adjusting either one keeps both in sync.
-
----
-
-### Output Panel (always visible at the bottom)
-
-The output panel shows the assembled caption and lyrics in real time and provides all send/copy/save actions.
-
-#### Caption and Lyrics display
-Read-only text boxes updated automatically whenever you change anything in any tab. This is exactly what will be sent to ACE-Step.
-
-#### Action buttons
-
-| Button | Action |
+| Control | Description |
 |---|---|
-| Copy Caption | Copy the caption string to clipboard |
-| Copy Lyrics | Copy the lyrics to clipboard |
-| Copy All | Copy both with labeled headers (`--- Caption ---` / `--- Lyrics ---`) |
-| Fill ComfyUI Fields | Patch the ACE-Step caption and lyrics nodes in your loaded ComfyUI workflow |
-| Queue ComfyUI Workflow | Send a full generation request to `/prompt` |
-| Preset name field | Type a name for your preset |
-| Save Preset | Save all current state to `presets/<name>.json` |
-| Load Preset | Open a file picker over the `presets/` folder to restore a saved session |
+| Caption box | Live assembled tags string |
+| Lyrics box | Live lyrics |
+| Copy Caption | Copy tags to clipboard |
+| Copy Lyrics | Copy lyrics to clipboard |
+| Copy All | Copy both with `--- Caption ---` / `--- Lyrics ---` headers |
+| Preview Raw Payload | Show exact JSON sent to the ACE-Step node |
+| Fill ComfyUI Fields | Patch the open workflow's ACE-Step node (no queue) |
+| Queue ComfyUI Workflow | Send full workflow to `/prompt` and start generation |
+| Tag Last MP3 | Write ID3 tags to the most recent MP3 in ComfyUI's output folder |
+| Preset name + Save | Save session to `presets/<name>.json` |
+| Load Preset | Restore a saved session — all tabs update immediately |
+| Status indicator | ComfyUI Online/Offline, and generation Done/Error state |
 
-#### ComfyUI status indicator
-Shows **ComfyUI: Online ✓** (green) or **ComfyUI: Offline ✗** (red). Checked automatically every 30 seconds. A red indicator means Fill/Queue buttons will return an error.
+### After Queuing
+When you click **Queue ComfyUI Workflow**:
+1. Filled workflow sent to ComfyUI `/prompt`
+2. AceTalkBridge pushes the workflow to ComfyUI's browser (nodes show actual text + progress highlights)
+3. A **payload dialog** shows the exact tags, lyrics, parameters, and seed used
+4. Background WebSocket monitor watches for completion
+5. **Completion popup** appears when ComfyUI finishes, with output filename
+
+---
+
+## Song Metadata + MP3 Tagging
+
+The **Song Metadata** section in the Overview tab holds:
+- Song Title, Artist, Album, Year
+- Genre Tags (comma-separated, written to ID3 TCON)
+- Description (written to ID3 COMM comment)
+
+Click **Tag Last MP3** in the output panel to write these as ID3 tags to the most recently generated MP3 in ComfyUI's `output/audio/` folder.
 
 ---
 
 ## Presets
 
-Presets save your entire session state — genre, BPM, key, instruments, vocal tags, lyrics, and all parameters — to a JSON file in the `presets/` folder.
+Presets save your entire session — genre, BPM, key, instruments, vocals, lyrics, all parameters, seed state, and metadata — to a JSON file in `presets/`.
 
-**To save:** Type a name in the preset name field and click **Save Preset**.
-
-**To load:** Click **Load Preset**, navigate to `presets/`, and select a `.json` file. All tabs update immediately.
-
-Preset files are plain JSON and can be copied, shared, or version-controlled.
+- **Save:** type a name and click Save Preset
+- **Load:** click Load Preset, pick a `.json` file — all tabs update immediately
+- Plain JSON, shareable and version-controllable
 
 ---
 
-## How ACE-Step Prompting Works
+## AceTalkBridge — How It Works
 
-ACE-Step 1.5 is not a command-based engine — it is a text-conditioned generative model. The "commands" are natural language phrases and structural tags that guide its creative planning.
+`AceTalkBridge/` is a minimal ComfyUI custom node that:
 
-### Caption (tags string)
-The caption is a comma-separated list of descriptors. The more specific and consistent with ACE-Step's training data, the better the results. Order matters slightly — genre and tempo come first, followed by harmonic context, then instrumentation.
+1. Registers `POST /acetalk/load` on ComfyUI's aiohttp server
+2. When AceTalk sends the filled workflow there, broadcasts it to all connected browser clients via WebSocket (`sid=None` broadcast)
+3. `web/acetalk_bridge.js` listens for the broadcast and calls `app.loadGraphData()` on the canvas
 
-Example:
-```
-psytrance, 145 BPM, A Minor, Phrygian mode, 4/4 time, TB-303 synth bass, layered analog pads, electronic drums, tribal percussion, close-mic vocal, female vocal, breathy, airy
-```
+Result: every time you queue from AceTalk, ComfyUI's browser UI automatically loads the filled workflow — the `TextEncodeAceStepAudio1.5` node displays the actual tags and lyrics, and node execution highlights work correctly.
 
-### Lyrics (structured text)
-Section tags tell ACE-Step where the song transitions. The model uses them to allocate musical energy and arrangement density.
-
-```
-[Intro: Atmospheric]
-The forest breathes in silence
-A frequency beneath the ground
-
-[Build: Heavy]
-Frequencies collide
-The signal finds the spine
-
-[Drop: Virtuosic]
-Let it rise, let it fall
-Nothing left, we have it all
-
-[Outro]
-Returning to the source
-The pulse dissolves to static
-```
-
-Qualifiers like `: Anthemic`, `: Dark`, `: Modulated` give additional direction about the energy or production style of that section.
+If the bridge is not installed, AceTalk still queues and generates normally.
 
 ---
 
 ## Data Files
 
-All data files live in `acetalk/data/`. They are plain JSON and can be edited directly.
+All data in `acetalk/data/` — plain JSON, edit directly.
 
 ### `genres.json`
-Defines the genre grid. Each entry:
+150 genres with parent categories. Each entry:
 ```json
 {
   "name": "Psytrance",
+  "parent": "Electronic",
   "tags": ["psytrance", "dark", "hypnotic", "driving"],
   "bpm_min": 138, "bpm_max": 148,
   "default_key": "A", "default_scale": "Minor", "default_mode": "Phrygian",
   "default_time_sig": "4/4",
   "description": "High-energy psychedelic trance...",
-  "typical_instruments": ["TB-303 synth bass", "layered analog pads", ...]
+  "typical_instruments": ["TB-303 synth bass", "layered analog pads"]
 }
 ```
-Add new genres by adding entries to this array. They appear automatically in the Style tab grid.
 
 ### `instruments.json`
-Defines instrument categories and keyword chips. Structure:
-```json
-{
-  "categories": {
-    "Electronic/Synths": {
-      "Lead Synths": ["supersaw lead", "FM synth lead", ...],
-      "Pads": ["lush wavetable pads", "detuned pads", ...]
-    }
-  },
-  "modifiers": {
-    "timbre": ["warm", "bright", "distorted", ...],
-    "mic": ["close-mic", "room mic", ...],
-    "mix": ["reverb-heavy", "dry", "sidechain pumping", ...]
-  }
-}
-```
-Add new categories, subcategories, or individual keywords freely. Restart the app to pick up changes.
+Instrument keyword chips organized by category and subcategory.
 
 ### `vocals.json`
-Local database of artist vocal profiles. Pre-seeded with a few examples. Format:
-```json
-{
-  "artists": [
-    {
-      "name": "Billie Eilish",
-      "range": "mezzo-soprano",
-      "preferred_key": "C Minor",
-      "style": "pop, dark pop, indie pop",
-      "known_for": ["Bad Guy", "Happier Than Ever"],
-      "ace_step_descriptors": ["breathy", "whispery", "close-mic vocal", "soft", "intimate", "female vocal"]
-    }
-  ]
-}
-```
-Web search results are automatically appended here. You can enrich auto-cached entries by adding `range`, `preferred_key`, `style`, and `known_for` fields manually.
+Local artist vocal profiles. Auto-updated by web search. Add `range`, `preferred_key`, `style`, `known_for`, and `ace_step_descriptors` for best results.
 
 ### `templates.json`
-Lyric scaffold templates by structure and theme. Format:
-```json
-{
-  "structures": {
-    "Verse-Chorus": {
-      "layout": ["[Intro]", "[Verse]", "[Chorus]", "[Verse]", "[Chorus]", "[Outro]"],
-      "themes": {
-        "Love/Uplifting": "[Intro]\n...\n[Verse]\n..."
-      }
-    }
-  }
-}
-```
-Add new themes or structures by extending this file.
+Lyric scaffold templates by structure and theme.
 
 ---
 
@@ -353,44 +277,48 @@ Add new themes or structures by extending this file.
 
 ```
 AceUser/
-  acetalk.py                    # Entry point — launches QApplication + MainWindow
-  config.json                   # Runtime config (ComfyUI URL, Brave key) — git-ignored
+  acetalk.py                    # Entry point
+  config.json                   # Runtime config — git-ignored
+  config.example.json           # Template config for new installs
+  workflow_template.json        # ACE-Step ComfyUI workflow (API format)
+  last_sent.json                # Written after each queue — load in ComfyUI to inspect
   requirements.txt
+
+  AceTalkBridge/                # ComfyUI custom node — copy to ComfyUI/custom_nodes/
+    __init__.py                 # Server route + WebSocket broadcast
+    web/
+      acetalk_bridge.js         # Browser extension — loads workflow on broadcast
 
   acetalk/
     core/
       state.py                  # SessionState dataclass (shared data model)
-      prompt_builder.py         # Assembles caption + lyrics strings from SessionState
-      comfyui_api.py            # HTTP client: ping, fill_fields, queue_workflow
-      search.py                 # Brave + DDG vocalist search, local cache
+      prompt_builder.py         # Assembles caption + lyrics from SessionState
+      comfyui_api.py            # HTTP client: ping, fill_fields, queue, bridge call
+      search.py                 # Brave + DuckDuckGo search, local vocal cache
       llm.py                    # Ollama: list_models(), generate_lyrics() (streaming)
 
     tabs/
-      style_tab.py              # Tab 1: genre grid, BPM/key/scale/mode/time controls
-      instrument_tab.py         # Tab 2: category tree, keyword chips, modifier chips
-      vocalist_tab.py           # Tab 3: artist search, descriptor chip picker
-      lyrics_tab.py             # Tab 4: template + Ollama modes, tag toolbar, editor
-      parameters_tab.py         # Tab 5: cfg_scale, temp, top_p, top_k, min_p, steps, duration
+      overview_tab.py           # Fully editable song overview — all fields in one place
+      easy_tab.py               # Band + vocalist research → auto-generate full prompt
+      style_tab.py              # 150-genre browser with category sidebar + search
+      instrument_tab.py         # Instrument keyword chips by category
+      vocalist_tab.py           # Artist search + vocal descriptor picker
+      lyrics_tab.py             # Template + Ollama modes, section tag toolbar
+      parameters_tab.py         # Sampler params + seed/lock controls
 
     ui/
-      main_window.py            # QMainWindow: tab widget + output panel, preset wiring
-      output_panel.py           # Bottom panel: caption/lyrics display + action buttons
-      settings_dialog.py        # Gear-icon dialog: ComfyUI URL, Brave key, test button
+      main_window.py            # QMainWindow: tabs, output panel, generation monitor
+      output_panel.py           # Caption/lyrics display + all action buttons
+      settings_dialog.py        # ComfyUI URL, Ollama URL, Brave key
 
     data/
-      genres.json               # Genre definitions (14 genres)
-      instruments.json          # Instrument keyword library (7 categories)
-      vocals.json               # Local artist vocal database (auto-updated by web search)
+      genres.json               # 150 genres in 17 parent categories
+      instruments.json          # Instrument keyword library
+      vocals.json               # Local artist vocal database (auto-updated)
       templates.json            # Lyric scaffold templates
 
-  presets/                      # User-saved session presets (one JSON per preset)
-  tests/                        # pytest test suite (23 tests)
-    conftest.py                 # QApplication fixture + sample_state fixture
-    test_state.py
-    test_prompt_builder.py
-    test_search.py
-    test_llm.py
-    test_comfyui_api.py
+  presets/                      # User-saved session presets (git-ignored)
+  tests/                        # pytest test suite
 ```
 
 ---
@@ -402,41 +330,36 @@ cd AceUser
 python3 -m pytest tests/ -v
 ```
 
-Expected: 23 tests, all passing. Tests cover the core logic (state, prompt building, search, LLM client, ComfyUI API) but not the UI tabs directly.
-
 ---
 
-## Extending AceTalk
+## How ACE-Step Prompting Works
 
-### Add a genre
-Edit `acetalk/data/genres.json` — add an object with `name`, `tags`, `bpm_min`, `bpm_max`, `default_key`, `default_scale`, `default_mode`, `default_time_sig`, `description`, and `typical_instruments`. Restart the app.
+### Tags string
+Comma-separated descriptors. Genre and tempo first, then harmonic context, then instrumentation.
 
-### Add instrument keywords
-Edit `acetalk/data/instruments.json` — find the right subcategory and append to its list, or add a new subcategory. Restart the app.
-
-### Add a vocalist to the local DB
-Edit `acetalk/data/vocals.json` — add an entry to the `artists` array following the schema above. No restart needed — the file is read on each search.
-
-### Add a lyric template
-Edit `acetalk/data/templates.json` — add a theme to an existing structure, or add a new structure following the existing schema. Restart the app.
-
-### Add a new Ollama model
-Just install it with `ollama pull <model>`. AceTalk reads the model list fresh each launch.
-
----
-
-## Configuration Reference
-
-`config.json` is created on first save from the Settings dialog. Fields:
-
-```json
-{
-  "comfyui_url": "http://127.0.0.1:8188",
-  "brave_api_key": ""
-}
+```
+psytrance, 145 BPM, A Minor, Phrygian mode, 4/4 time, TB-303 synth bass,
+layered analog pads, electronic drums, tribal percussion, female vocal, breathy, airy
 ```
 
-The Brave API key is also read from the `BRAVE_API_KEY` environment variable — setting it in the environment works without going through the Settings dialog.
+### Lyrics
+Section tags guide the model's structural and energy planning.
+
+```
+[Intro: Atmospheric]
+The forest breathes in silence
+
+[Build: Heavy]
+Frequencies collide, the signal finds the spine
+
+[Drop: Virtuosic]
+Let it rise, let it fall
+
+[Outro]
+The pulse dissolves to static
+```
+
+Qualifiers like `: Anthemic`, `: Dark`, `: Modulated` give production direction for each section.
 
 ---
 
@@ -444,16 +367,16 @@ The Brave API key is also read from the `BRAVE_API_KEY` environment variable —
 
 | Situation | Behavior |
 |---|---|
-| ComfyUI unreachable | Status indicator turns red, Fill/Queue buttons return an error dialog |
-| Brave Search API fails | Silent fallback to DuckDuckGo; "(ddg)" source label in result |
-| DuckDuckGo also fails | Search returns nothing; no crash |
-| Ollama not running | Lyrics tab model dropdown shows "(Ollama offline)" |
-| LLM generation error | Error message appended inline in the lyrics editor |
-| Preset name is blank | Save silently does nothing |
-| Loading invalid JSON preset | Python exception — check the file for formatting errors |
+| ComfyUI unreachable | Status turns red; queue buttons show error dialog |
+| AceTalkBridge not installed | Queue still works; nodes don't auto-update in browser |
+| Brave Search fails | Silent fallback to DuckDuckGo |
+| DuckDuckGo fails | Search returns nothing, no crash |
+| Ollama offline | Model dropdown shows "(Ollama offline)" |
+| Reasoning model `<think>` output | Stripped automatically |
+| Same job queued twice | New random seed each time (unless seed is locked) |
 
 ---
 
-## System This Runs On
+## System
 
-Built and tested on an ASUS GX10 128 GB AI workstation running Linux with an NVIDIA GPU. Python 3.12, ComfyUI with ACE-Step 1.5 custom nodes.
+Built on Nyx — ASUS GX10 128 GB AI workstation, Linux, NVIDIA GPU. Python 3.12, ComfyUI with ACE-Step 1.5 XL Turbo (`acestep_v1.5_xl_turbo_bf16.safetensors`).

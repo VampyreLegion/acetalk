@@ -37,6 +37,8 @@ class SessionState:
     duration: int = 120
     steps: int = 8
     task_type: str = "text2music"
+    seed: int = -1          # -1 = randomize on each send
+    lock_seed: bool = False  # True = reuse seed for iterative refinement
 
     def to_dict(self) -> dict:
         return asdict(self)

@@ -1,4 +1,5 @@
 import logging
+import random
 
 import requests
 
@@ -123,6 +124,20 @@ class ComfyUIClient:
 
         if not filled:
             return {"error": "Could not find a TextEncodeAceStepAudio1.5 node in workflow_template.json"}
+
+        # Determine seed — use locked seed or generate fresh random
+        if state.lock_seed and state.seed >= 0:
+            new_seed = state.seed
+        else:
+            new_seed = random.randint(0, 2**32 - 1)
+            state.seed = new_seed  # store so UI can display it
+
+        for node in workflow.values():
+            if not isinstance(node, dict):
+                continue
+            inputs = node.get("inputs", {})
+            if "seed" in inputs and isinstance(inputs["seed"], (int, float)):
+                inputs["seed"] = new_seed
 
         # Save filled workflow so it can be loaded in ComfyUI to inspect node values
         last_sent_path = os.path.normpath(
