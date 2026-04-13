@@ -190,21 +190,21 @@ Always visible at the bottom of the window.
 | Copy Caption | Copy tags to clipboard |
 | Copy Lyrics | Copy lyrics to clipboard |
 | Copy All | Copy both with `--- Caption ---` / `--- Lyrics ---` headers |
-| Preview Raw Payload | Show exact JSON sent to the ACE-Step node |
-| Fill ComfyUI Fields | Patch the open workflow's ACE-Step node (no queue) |
-| Queue ComfyUI Workflow | Send full workflow to `/prompt` and start generation |
+| Preview Raw Payload | Show exact JSON that would be sent to the ACE-Step node |
+| Composition to Nyx | Open review dialog → confirm or cancel before anything is sent |
 | Tag Last MP3 | Write ID3 tags to the most recent MP3 in ComfyUI's output folder |
 | Preset name + Save | Save session to `presets/<name>.json` |
 | Load Preset | Restore a saved session — all tabs update immediately |
 | Status indicator | ComfyUI Online/Offline, and generation Done/Error state |
 
-### After Queuing
-When you click **Queue ComfyUI Workflow**:
-1. Filled workflow sent to ComfyUI `/prompt`
-2. AceTalkBridge pushes the workflow to ComfyUI's browser (nodes show actual text + progress highlights)
-3. A **payload dialog** shows the exact tags, lyrics, parameters, and seed used
-4. Background WebSocket monitor watches for completion
-5. **Completion popup** appears when ComfyUI finishes, with output filename
+### Composition to Nyx — Send Flow
+When you click **Composition to Nyx**:
+1. Workflow is built locally — no network calls yet
+2. A **review dialog** opens showing the exact Tags, Lyrics, Parameters, and Seed that will be sent
+3. **Cancel** (or close with X) → discards everything, nothing is sent to ComfyUI
+4. **Send to Nyx** → queues the job: fills ComfyUI's `/prompt` endpoint and pushes the workflow to the browser via AceTalkBridge (nodes show actual text + progress highlights)
+5. Background WebSocket monitor watches for generation completion
+6. **Completion popup** appears when Nyx finishes, with the output filename
 
 ---
 
@@ -367,8 +367,9 @@ Qualifiers like `: Anthemic`, `: Dark`, `: Modulated` give production direction 
 
 | Situation | Behavior |
 |---|---|
-| ComfyUI unreachable | Status turns red; queue buttons show error dialog |
-| AceTalkBridge not installed | Queue still works; nodes don't auto-update in browser |
+| ComfyUI unreachable | Status turns red; Send to Nyx shows error dialog |
+| Cancelled in review dialog | Nothing sent — job never reaches ComfyUI |
+| AceTalkBridge not installed | Send still works; nodes don't auto-update in browser |
 | Brave Search fails | Silent fallback to DuckDuckGo |
 | DuckDuckGo fails | Search returns nothing, no crash |
 | Ollama offline | Model dropdown shows "(Ollama offline)" |
