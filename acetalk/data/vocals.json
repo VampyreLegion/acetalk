@@ -68,6 +68,17 @@
         "vocal"
       ],
       "_source": "ddg"
+    },
+    {
+      "name": "Katie Perry",
+      "range": "",
+      "preferred_key": "",
+      "style": "",
+      "known_for": [],
+      "ace_step_descriptors": [
+        "vocal"
+      ],
+      "_source": "ddg"
     }
   ]
 }
