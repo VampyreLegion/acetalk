@@ -104,6 +104,13 @@ Open **Settings** (⚙ gear icon, top toolbar):
 
 Click **Test ComfyUI** to verify. Settings are saved to `config.json`.
 
+> **ComfyUI URL — use localhost, not the Cloudflare tunnel.**
+> If AceTalk is running on the same machine as ComfyUI, always use `http://127.0.0.1:8188`.
+> Using a Cloudflare Access-protected URL (e.g. `https://ai.nyxstudios.net`) causes a silent failure:
+> the status indicator shows **Online** (the OAuth redirect returns HTTP 200), but **Composition to Nyx**
+> fails with `Expecting value: line 1 column 1 (char 0)` because the response is an HTML login page,
+> not JSON. Fix: open Settings and reset the ComfyUI URL to `http://127.0.0.1:8188`.
+
 To change the default Ollama model, add `"preferred_model": "yourmodel:tag"` directly to `config.json`.
 
 ---
@@ -412,7 +419,8 @@ Append `: descriptor` to any tag for production direction: `[Chorus: Anthemic]`,
 
 | Situation | Behavior |
 |---|---|
-| ComfyUI unreachable | Status turns red; Send to Nyx shows error dialog |
+| ComfyUI unreachable (connection refused) | Status turns red; Send to Nyx shows error dialog |
+| ComfyUI URL set to Cloudflare tunnel | Status falsely shows Online; Send to Nyx fails with JSON error — reset URL to `http://127.0.0.1:8188` |
 | Cancelled in review dialog | Nothing sent — job never reaches ComfyUI |
 | AceTalkBridge not installed | Send still works; nodes don't auto-update in browser |
 | Brave Search fails | Silent fallback to DuckDuckGo |
