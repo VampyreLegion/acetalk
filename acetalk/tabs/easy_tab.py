@@ -474,11 +474,17 @@ class EasyTab(QWidget):
             return
 
         VOCAL_KEYWORDS = {
+            # Tone
             "breathy", "raspy", "smooth", "nasal", "powerful", "clear",
+            # Style
             "whispered", "belted", "falsetto", "spoken word", "operatic",
+            # Texture
             "airy", "gritty", "warm", "bright", "vibrato", "melismatic",
-            "female vocal", "male vocal", "androgynous vocal", "close-mic vocal",
-            "soulful", "husky", "soft", "intimate",
+            # Gender
+            "female vocal", "male vocal", "androgynous vocal",
+            # Common AI extras
+            "close-mic vocal", "soulful", "husky", "soft", "intimate",
+            "ethereal", "haunting", "tender", "emotive", "expressive",
         }
         SCALES = {"major", "minor", "dorian", "phrygian", "lydian",
                   "mixolydian", "locrian", "harmonic minor", "pentatonic"}
@@ -527,9 +533,12 @@ class EasyTab(QWidget):
                     scale = candidate_scale
                     continue
 
-            # Vocal keyword
-            if low in VOCAL_KEYWORDS:
-                vocal_tags.append(part)
+            # Vocal keyword — normalise to lowercase; also try stripping trailing 's'
+            # so "female vocals" matches "female vocal", "breathy vocals" → "breathy"
+            low_stripped = low.rstrip("s") if low not in VOCAL_KEYWORDS and low.endswith("s") else low
+            matched_kw = low if low in VOCAL_KEYWORDS else (low_stripped if low_stripped in VOCAL_KEYWORDS else None)
+            if matched_kw:
+                vocal_tags.append(matched_kw)
                 continue
 
             # First non-matched part that has no numbers → treat as genre
