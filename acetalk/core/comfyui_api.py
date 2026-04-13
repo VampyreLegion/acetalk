@@ -102,6 +102,11 @@ class ComfyUIClient:
             if isinstance(node, dict) and node.get("class_type") == "EmptyAceStep1.5LatentAudio":
                 node.setdefault("inputs", {})["seconds"] = float(state.duration)
 
+        # Sync KSampler steps from state
+        for node in workflow.values():
+            if isinstance(node, dict) and node.get("class_type") == "KSampler":
+                node.setdefault("inputs", {})["steps"] = state.steps
+
         # Determine seed — use locked seed or generate fresh random
         if state.lock_seed and state.seed >= 0:
             new_seed = state.seed
