@@ -12,7 +12,7 @@ import requests
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
-    QPushButton, QTextEdit, QComboBox, QFrame, QSizePolicy
+    QPushButton, QTextEdit, QComboBox, QFrame, QSizePolicy, QCheckBox
 )
 from PyQt6.QtCore import pyqtSignal, QThread, pyqtSlot, Qt
 from PyQt6.QtGui import QFont
@@ -85,7 +85,7 @@ class _ResearchWorker(QThread):
     error = pyqtSignal(str)
 
     def __init__(self, band, vocalist, topic, mood, name_override, structure, model, ollama_url,
-                 style_genre: dict = None):
+                 style_genre: dict = None, instrumental: bool = False):
         super().__init__()
         self.band = band
         self.vocalist = vocalist
@@ -96,6 +96,7 @@ class _ResearchWorker(QThread):
         self.model = model
         self.ollama_url = ollama_url
         self.style_genre = style_genre  # dict from genres.json, or None
+        self.instrumental = instrumental
 
     def run(self):
         try:
@@ -138,6 +139,36 @@ class _ResearchWorker(QThread):
                     f"The caption should feel like {g['name']} first, with {self.band}'s character layered on top.\n"
                 )
 
+            if self.instrumental:
+                lyrics_task = (
+                    f"This is an INSTRUMENTAL track — no vocals, no sung lyrics.\n"
+                    f"Set \"lyrics\" to a single line: [Instrumental]\n"
+                    f"Do NOT include any vocal descriptors in the caption.\n"
+                    f"Structure the caption around the instruments and production only.\n"
+                    f"Song structure: {self.structure}\n"
+                )
+                lyrics_rules = (
+                    "- \"lyrics\" must be exactly: [Instrumental]\n"
+                    "- No vocal tags in the caption\n"
+                )
+            else:
+                lyrics_task = (
+                    f"Write lyrics that capture {self.band}'s signature lyrical voice:\n"
+                    f"  - Mirror their typical themes, imagery, and poetic devices\n"
+                    f"  - Match {self.vocalist}'s phrasing, cadence, and emotional delivery\n"
+                    f"  - Use the same level of abstraction or directness they're known for\n"
+                    f"{topic_instruction}\n"
+                    f"{mood_instruction}\n"
+                    f"{name_instruction}\n"
+                    f"Song structure: {self.structure}\n"
+                )
+                lyrics_rules = (
+                    "- Lyrics must sound unmistakably like they could be from a real "
+                    f"{self.band} song sung by {self.vocalist}\n"
+                    "- Every section MUST start with a structural tag on its own line\n"
+                    "- No plain text before the first tag, no explanations inside the lyrics\n"
+                )
+
             prompt = f"""You are a professional music producer and lyricist specialising in ACE-Step 1.5 AI music generation.
 
 BAND RESEARCH for "{self.band}":
@@ -148,29 +179,23 @@ VOCALIST RESEARCH for "{self.vocalist}":
 {style_block}
 TASK:
 Using the research above, create a complete ACE-Step 1.5 music prompt.
-{topic_instruction}
-{mood_instruction}
-{name_instruction}
-Song structure: {self.structure}
-
-ACE-Step structural tags you MUST use to control song flow and energy:
+{lyrics_task}
+ACE-Step structural tags to use in lyrics (choose those that fit the genre and energy):
   Structure:  [Intro]  [Verse]  [Pre-Chorus]  [Chorus]  [Bridge]  [Outro]
   Energy:     [Build]  [Drop]  [Breakdown]  [Fade Out]  [Silence]
   Performance:[Guitar Solo]  [Piano Interlude]  [Drum Break]  [Solo]  [Instrumental]
-  Qualifiers: add ": descriptor" for energy/mood — e.g.
+  Qualifiers: add ": descriptor" — e.g.
               [Intro: Atmospheric]  [Chorus: Anthemic]  [Build: Heavy]
               [Drop: Euphoric]  [Verse: Intimate]  [Bridge: Haunting]
               [Outro: Fading]  [Solo: Virtuosic]  [Breakdown: Sparse]
 
 Rules:
-- Every section MUST start with a tag on its own line
-- Choose tags that match the genre and mood (e.g. EDM needs [Build] and [Drop], rock needs [Guitar Solo])
+- Choose tags that match the genre (EDM needs [Build]/[Drop], rock needs [Guitar Solo])
 - Use qualifier variants to set energy and production character for each section
-- No plain text before the first tag, no explanations inside the lyrics
-
+{lyrics_rules}
 Return ONLY valid JSON with exactly two keys:
-- "caption": a comma-separated string of ACE-Step style tags (genre, BPM, key, scale, mode, time signature, instruments, vocal descriptors — modelled on {self.band}'s sound and {self.vocalist}'s vocal style)
-- "lyrics": full structured song using the tags above — no text outside section tags and lyric lines
+- "caption": a comma-separated string of ACE-Step style tags (genre, BPM, key, scale, mode, time signature, instruments{"" if self.instrumental else f", vocal descriptors — modelled on {self.vocalist}'s vocal style"})
+- "lyrics": structured song text as described above
 
 Return ONLY the JSON object. No explanation, no markdown fences.
 """
@@ -324,7 +349,7 @@ class EasyTab(QWidget):
         row5.addStretch()
         input_layout.addLayout(row5)
 
-        # Generate button + status
+        # Generate button + instrumental checkbox + status
         btn_row = QHBoxLayout()
         self.gen_btn = QPushButton("Research & Generate")
         self.gen_btn.setFixedHeight(32)
@@ -341,6 +366,16 @@ class EasyTab(QWidget):
         """)
         self.gen_btn.clicked.connect(self._start)
         btn_row.addWidget(self.gen_btn)
+
+        self.instrumental_check = QCheckBox("Instrumental Only")
+        self.instrumental_check.setStyleSheet(
+            "color: #a0a0d0; font-size: 10px; border: none; padding-left: 8px;"
+        )
+        self.instrumental_check.setToolTip(
+            "Generate a caption with no vocals or lyrics — pure instrumental track."
+        )
+        btn_row.addWidget(self.instrumental_check)
+
         self.status_label = QLabel("")
         self.status_label.setStyleSheet(STATUS_STYLE)
         btn_row.addWidget(self.status_label)
@@ -433,6 +468,7 @@ class EasyTab(QWidget):
         ollama_url = self.config.get("ollama_url", "http://localhost:11434")
 
         selected_genre = self.style_combo.currentData()  # dict or None
+        instrumental = self.instrumental_check.isChecked()
 
         self._worker = _ResearchWorker(
             band=band,
@@ -444,6 +480,7 @@ class EasyTab(QWidget):
             model=model,
             ollama_url=ollama_url,
             style_genre=selected_genre,
+            instrumental=instrumental,
         )
         self._worker.status_update.connect(self._on_status)
         self._worker.result_ready.connect(self._on_result)
