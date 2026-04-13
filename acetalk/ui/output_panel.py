@@ -46,8 +46,7 @@ class OutputPanel(QWidget):
         self.btn_copy_all = QPushButton("Copy All")
         self.btn_preview = QPushButton("Preview Raw Payload")
         self.btn_tag = QPushButton("Tag Last MP3")
-        self.btn_fill = QPushButton("Fill ComfyUI Fields")
-        self.btn_queue = QPushButton("Queue ComfyUI Workflow")
+        self.btn_queue = QPushButton("Composition to Nyx")
         self.preset_name = QLineEdit()
         self.preset_name.setPlaceholderText("Preset name...")
         self.preset_name.setFixedWidth(140)
@@ -56,7 +55,7 @@ class OutputPanel(QWidget):
         self.status_label = QLabel("ComfyUI: unknown")
 
         for w in [self.btn_copy_cap, self.btn_copy_lyr, self.btn_copy_all,
-                  self.btn_preview, self.btn_fill, self.btn_queue, self.btn_tag,
+                  self.btn_preview, self.btn_queue, self.btn_tag,
                   self.preset_name, self.btn_save, self.btn_load,
                   self.status_label]:
             btn_row.addWidget(w)
@@ -70,10 +69,6 @@ class OutputPanel(QWidget):
         self.btn_copy_lyr.clicked.connect(
             lambda: self._copy(self.lyrics_box.toPlainText()))
         self.btn_copy_all.clicked.connect(self._copy_all)
-        self.btn_fill.clicked.connect(
-            lambda: self.push_requested.emit(
-                self.caption_box.toPlainText(),
-                self.lyrics_box.toPlainText()))
         self.btn_queue.clicked.connect(
             lambda: self.push_requested.emit(
                 self.caption_box.toPlainText(),
