@@ -47,10 +47,17 @@ def generate_lyrics(
         f"You are an expert lyricist specializing in {genre} music. "
         f"Write lyrics in the key of {key}, {mood_str}. "
         f"Use this song structure: {structure}.{subject_str}{name_str} "
-        f"Format sections with ACE-Step structural tags like [Intro], [Verse], [Chorus], [Bridge], [Outro]. "
-        f"Use qualifier variants like [Chorus: Anthemic] or [Intro: Atmospheric] where appropriate. "
-        f"Output ONLY the lyrics — no explanations, no reasoning, no headings outside of brackets. "
-        f"Do not include any text before the first section tag."
+        f"Format every section with ACE-Step structural tags. "
+        f"Available tags — use whichever fit the genre and energy: "
+        f"Structure: [Intro] [Verse] [Pre-Chorus] [Chorus] [Bridge] [Outro] "
+        f"Energy/Production: [Build] [Drop] [Breakdown] [Fade Out] [Silence] "
+        f"Performance: [Guitar Solo] [Piano Interlude] [Drum Break] [Solo] [Instrumental] "
+        f"Qualifiers: append ': descriptor' to any tag for mood/energy, e.g. "
+        f"[Intro: Atmospheric] [Chorus: Anthemic] [Build: Heavy] [Drop: Euphoric] "
+        f"[Verse: Intimate] [Bridge: Haunting] [Outro: Fading] [Solo: Virtuosic] [Breakdown: Sparse]. "
+        f"Choose tags that match the genre — EDM needs [Build] and [Drop], rock needs [Guitar Solo], etc. "
+        f"Every section MUST start with a tag on its own line. "
+        f"Output ONLY the lyrics — no explanations, no reasoning, no text before the first section tag."
     )
     payload = {
         "model": model,

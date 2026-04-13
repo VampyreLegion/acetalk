@@ -107,7 +107,7 @@ class _ResearchWorker(QThread):
             topic_instruction = f"Song topic: {self.topic}." if self.topic else ""
             mood_instruction = f"Mood/vibe: {self.mood}." if self.mood else ""
 
-            prompt = f"""You are a professional music producer and lyricist.
+            prompt = f"""You are a professional music producer and lyricist specialising in ACE-Step 1.5 AI music generation.
 
 BAND RESEARCH for "{self.band}":
 {band_text[:1500]}
@@ -122,9 +122,24 @@ Using the research above, create a complete ACE-Step 1.5 music prompt.
 {name_instruction}
 Song structure: {self.structure}
 
+ACE-Step structural tags you MUST use to control song flow and energy:
+  Structure:  [Intro]  [Verse]  [Pre-Chorus]  [Chorus]  [Bridge]  [Outro]
+  Energy:     [Build]  [Drop]  [Breakdown]  [Fade Out]  [Silence]
+  Performance:[Guitar Solo]  [Piano Interlude]  [Drum Break]  [Solo]  [Instrumental]
+  Qualifiers: add ": descriptor" for energy/mood — e.g.
+              [Intro: Atmospheric]  [Chorus: Anthemic]  [Build: Heavy]
+              [Drop: Euphoric]  [Verse: Intimate]  [Bridge: Haunting]
+              [Outro: Fading]  [Solo: Virtuosic]  [Breakdown: Sparse]
+
+Rules:
+- Every section MUST start with a tag on its own line
+- Choose tags that match the genre and mood (e.g. EDM needs [Build] and [Drop], rock needs [Guitar Solo])
+- Use qualifier variants to set energy and production character for each section
+- No plain text before the first tag, no explanations inside the lyrics
+
 Return ONLY valid JSON with exactly two keys:
 - "caption": a comma-separated string of ACE-Step style tags (genre, BPM, key, scale, mode, time signature, instruments, vocal descriptors — modelled on {self.band}'s sound and {self.vocalist}'s vocal style)
-- "lyrics": full song lyrics using ACE-Step structural tags like [Intro: Atmospheric], [Verse], [Chorus: Anthemic], [Bridge: Haunting], [Outro] etc. No text outside of section tags and lyric lines.
+- "lyrics": full structured song using the tags above — no text outside section tags and lyric lines
 
 Return ONLY the JSON object. No explanation, no markdown fences.
 """
