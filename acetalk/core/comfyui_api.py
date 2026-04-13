@@ -19,25 +19,6 @@ def ping(base_url: str = DEFAULT_URL) -> bool:
         return False
 
 
-def queue_workflow(
-    state: SessionState,
-    caption: str,
-    workflow_json: dict,
-    base_url: str = DEFAULT_URL,
-) -> dict:
-    """
-    POST a workflow JSON to ComfyUI's /prompt endpoint.
-    Returns the response JSON (contains prompt_id).
-    """
-    resp = requests.post(
-        f"{base_url}/prompt",
-        json={"prompt": workflow_json},
-        timeout=10,
-    )
-    resp.raise_for_status()
-    return resp.json()
-
-
 class ComfyUIClient:
     """Stateful client that holds the ComfyUI base URL from config."""
 
@@ -47,12 +28,9 @@ class ComfyUIClient:
     def ping(self) -> bool:
         return ping(self.base_url)
 
-    def queue_workflow(self, state: SessionState, caption: str, workflow_json: dict) -> dict:
-        return queue_workflow(state, caption, workflow_json, self.base_url)
-
     def build_encoder_inputs(self, caption: str, lyrics: str, state: SessionState) -> dict:
-        """Return the exact inputs dict that would be sent to TextEncodeAceStepAudio1.5 — without sending."""
-        inputs = {
+        """Return the exact inputs dict for TextEncodeAceStepAudio1.5 — without sending."""
+        return {
             "tags": caption,
             "lyrics": lyrics,
             "bpm": state.bpm,
@@ -67,13 +45,12 @@ class ComfyUIClient:
             "language": "en",
             "generate_audio_codes": True,
         }
-        return inputs
 
-    def fill_fields(self, caption: str, lyrics: str, state: SessionState) -> dict:
+    def build_workflow(self, caption: str, lyrics: str, state: SessionState) -> dict:
         """
-        Queue a workflow by loading the template at workflow_template.json,
-        filling in tags/lyrics/params from state, and POSTing to /prompt.
-        Returns status dict.
+        Load the workflow template, fill all node inputs from state, and assign
+        a seed — but do NOT send anything. Returns {"workflow": {...}} on success
+        or {"error": "..."} on failure.
         """
         import os, json as _json
 
@@ -95,7 +72,7 @@ class ComfyUIClient:
         with open(template_path) as f:
             workflow = _json.load(f)
 
-        # Find TextEncodeAceStepAudio1.5 node and fill values
+        # Fill TextEncodeAceStepAudio1.5 node
         filled = False
         for node in workflow.values():
             if not isinstance(node, dict):
@@ -117,13 +94,13 @@ class ComfyUIClient:
                     inputs["timesignature"] = state.time_sig.split("/")[0]
                 filled = True
 
-        # Also sync EmptyAceStep1.5LatentAudio seconds to match duration
+        if not filled:
+            return {"error": "Could not find a TextEncodeAceStepAudio1.5 node in workflow_template.json"}
+
+        # Sync EmptyAceStep1.5LatentAudio seconds to match duration
         for node in workflow.values():
             if isinstance(node, dict) and node.get("class_type") == "EmptyAceStep1.5LatentAudio":
                 node.setdefault("inputs", {})["seconds"] = float(state.duration)
-
-        if not filled:
-            return {"error": "Could not find a TextEncodeAceStepAudio1.5 node in workflow_template.json"}
 
         # Determine seed — use locked seed or generate fresh random
         if state.lock_seed and state.seed >= 0:
@@ -139,7 +116,17 @@ class ComfyUIClient:
             if "seed" in inputs and isinstance(inputs["seed"], (int, float)):
                 inputs["seed"] = new_seed
 
-        # Save filled workflow so it can be loaded in ComfyUI to inspect node values
+        return {"workflow": workflow}
+
+    def send_workflow(self, workflow: dict) -> dict:
+        """
+        POST a pre-built workflow to ComfyUI's /prompt endpoint and push it to
+        the browser frontend via AceTalkBridge. Returns the /prompt response
+        (contains prompt_id) or {"error": "..."}.
+        """
+        import os, json as _json
+
+        # Save for manual inspection
         last_sent_path = os.path.normpath(
             os.path.join(os.path.dirname(__file__), "..", "..", "last_sent.json")
         )
@@ -149,6 +136,7 @@ class ComfyUIClient:
         except Exception:
             pass
 
+        # Queue the job
         try:
             resp = requests.post(
                 f"{self.base_url}/prompt",
@@ -160,7 +148,7 @@ class ComfyUIClient:
         except Exception as exc:
             return {"error": str(exc)}
 
-        # Push filled workflow to ComfyUI frontend so nodes show text + progress highlights
+        # Push to ComfyUI frontend (AceTalkBridge) — non-fatal if not installed
         try:
             requests.post(
                 f"{self.base_url}/acetalk/load",
@@ -168,6 +156,6 @@ class ComfyUIClient:
                 timeout=5,
             )
         except Exception:
-            pass  # Non-fatal — bridge extension may not be installed
+            pass
 
         return result

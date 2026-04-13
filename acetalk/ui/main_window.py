@@ -278,38 +278,56 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Tag MP3 Error", str(exc))
 
     def _on_push_requested(self, caption: str, lyrics: str):
-        result = self.comfyui.fill_fields(caption, lyrics, self.state)
+        song_name = self.output_panel.preset_name.text().strip() or self.state.genre or "Untitled"
+
+        # Build workflow first — no network calls yet
+        build_result = self.comfyui.build_workflow(caption, lyrics, self.state)
+        if "error" in build_result:
+            QMessageBox.warning(self, "ComfyUI Error", build_result["error"])
+            return
+
+        workflow = build_result["workflow"]
+
+        # Update seed display before showing dialog
+        self.parameters_tab.update_seed(self.state.seed)
+
+        # Show preview — user can cancel here before anything is sent
+        confirmed = self._show_payload_preview(caption, lyrics, song_name)
+        if not confirmed:
+            return
+
+        # User confirmed — now actually send
+        result = self.comfyui.send_workflow(workflow)
         if "error" in result:
             QMessageBox.warning(self, "ComfyUI Error", result["error"])
             return
 
-        song_name = self.output_panel.preset_name.text().strip() or self.state.genre or "Untitled"
         prompt_id = result.get("prompt_id", "")
         short_id  = prompt_id[:8] if prompt_id else "—"
+        self.output_panel.set_generation_status(f"Queued: {song_name}")
 
-        # Update seed display in Parameters tab so user sees what was used
-        self.parameters_tab.update_seed(self.state.seed)
+        QMessageBox.information(
+            self, "Sent to Nyx",
+            f"'{song_name}' queued successfully.\n\nJob ID: {short_id}"
+        )
 
-        # Auto-show the exact payload that was sent
-        self._show_sent_payload(caption, lyrics, song_name, short_id)
-
-        # Start generation monitor
         if prompt_id:
             self._start_generation_monitor(prompt_id, song_name)
 
-    def _show_sent_payload(self, caption: str, lyrics: str, song_name: str, short_id: str):
+    def _show_payload_preview(self, caption: str, lyrics: str, song_name: str) -> bool:
+        """Show a review dialog before sending. Returns True if user confirms, False if cancelled."""
         import json as _json
-        from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTextEdit, QPushButton, QLabel
+        from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTextEdit, QPushButton, QLabel, QHBoxLayout
         inputs = self.comfyui.build_encoder_inputs(caption, lyrics, self.state)
 
         dlg = QDialog(self)
-        dlg.setWindowTitle(f"Sent to Nyx — {song_name}")
-        dlg.setMinimumSize(700, 520)
+        dlg.setWindowTitle(f"Review before sending — {song_name}")
+        dlg.setMinimumSize(700, 560)
         layout = QVBoxLayout(dlg)
 
-        lock_str = f"  |  Seed: {self.state.seed} {'🔒 locked' if self.state.lock_seed else '(random)'}"
-        header = QLabel(f"Job <b>{short_id}</b> queued.{lock_str}")
-        header.setStyleSheet("color: #4caf50; font-size: 11px; padding: 4px 0;")
+        lock_str = f"  |  Seed: {self.state.seed} {'(locked)' if self.state.lock_seed else '(random)'}"
+        header = QLabel(f"Review what will be sent to Nyx.{lock_str}")
+        header.setStyleSheet("color: #a0a0d0; font-size: 11px; padding: 4px 0;")
         layout.addWidget(header)
 
         tags_lbl = QLabel("TAGS  (instruments + style):")
@@ -339,14 +357,24 @@ class MainWindow(QMainWindow):
         params_box = QTextEdit()
         params_box.setReadOnly(True)
         params_box.setPlainText(_json.dumps(params, indent=2))
-        params_box.setFixedHeight(120)
+        params_box.setFixedHeight(110)
         params_box.setStyleSheet("background:#1a1a2a; color:#e0e0f0; font-size:11px; border:1px solid #3a3a5c; font-family: monospace;")
         layout.addWidget(params_box)
 
-        close_btn = QPushButton("Close  (generation continues in background)")
-        close_btn.clicked.connect(dlg.accept)
-        layout.addWidget(close_btn)
-        dlg.exec()
+        btn_row = QHBoxLayout()
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.setStyleSheet("background:#3a2a2a; color:#f08080; padding: 6px 20px;")
+        cancel_btn.clicked.connect(dlg.reject)
+        send_btn = QPushButton("Send to Nyx")
+        send_btn.setDefault(True)
+        send_btn.setStyleSheet("background:#1a3a2a; color:#80f0a0; font-weight:bold; padding: 6px 20px;")
+        send_btn.clicked.connect(dlg.accept)
+        btn_row.addWidget(cancel_btn)
+        btn_row.addStretch()
+        btn_row.addWidget(send_btn)
+        layout.addLayout(btn_row)
+
+        return dlg.exec() == QDialog.DialogCode.Accepted
 
     def _start_generation_monitor(self, prompt_id: str, song_name: str):
         monitor = _GenerationMonitor(self.comfyui.base_url, prompt_id, self)
