@@ -124,6 +124,16 @@ class ComfyUIClient:
         if not filled:
             return {"error": "Could not find a TextEncodeAceStepAudio1.5 node in workflow_template.json"}
 
+        # Save filled workflow so it can be loaded in ComfyUI to inspect node values
+        last_sent_path = os.path.normpath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "last_sent.json")
+        )
+        try:
+            with open(last_sent_path, "w") as f:
+                _json.dump(workflow, f, indent=2)
+        except Exception:
+            pass
+
         try:
             resp = requests.post(
                 f"{self.base_url}/prompt",
@@ -131,6 +141,18 @@ class ComfyUIClient:
                 timeout=10,
             )
             resp.raise_for_status()
-            return resp.json()
+            result = resp.json()
         except Exception as exc:
             return {"error": str(exc)}
+
+        # Push filled workflow to ComfyUI frontend so nodes show text + progress highlights
+        try:
+            requests.post(
+                f"{self.base_url}/acetalk/load",
+                json=workflow,
+                timeout=5,
+            )
+        except Exception:
+            pass  # Non-fatal — bridge extension may not be installed
+
+        return result

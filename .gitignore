@@ -1,6 +1,9 @@
 # Config with API keys — never commit
 config.json
 
+# Auto-generated on each queue — load in ComfyUI to inspect last sent values
+last_sent.json
+
 # Python
 __pycache__/
 *.py[cod]

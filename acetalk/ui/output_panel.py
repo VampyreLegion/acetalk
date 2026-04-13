@@ -91,6 +91,15 @@ class OutputPanel(QWidget):
             self.status_label.setText("ComfyUI: Offline \u2717")
             self.status_label.setStyleSheet("color: #f44336;")
 
+    def set_generation_status(self, text: str):
+        self.status_label.setText(f"ComfyUI: {text}")
+        if text.startswith("Done"):
+            self.status_label.setStyleSheet("color: #4caf50; font-weight: bold;")
+        elif text.startswith("Error"):
+            self.status_label.setStyleSheet("color: #f44336; font-weight: bold;")
+        else:
+            self.status_label.setStyleSheet("color: #ffcc44; font-weight: bold;")
+
     def _copy(self, text: str):
         from PyQt6.QtWidgets import QApplication
         QApplication.clipboard().setText(text)

@@ -5,13 +5,68 @@ from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QTabWidget,
     QSplitter, QToolBar, QLabel, QMessageBox
 )
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, QThread, pyqtSignal
 from PyQt6.QtGui import QAction
 
 from ..core.state import SessionState
 from ..core.prompt_builder import build_prompt
 from ..core.comfyui_api import ComfyUIClient
 from .output_panel import OutputPanel
+
+class _GenerationMonitor(QThread):
+    """Watches ComfyUI WebSocket for a specific prompt_id completing."""
+    finished = pyqtSignal(str, list)   # (prompt_id, list of output filenames)
+    failed   = pyqtSignal(str, str)    # (prompt_id, error message)
+
+    def __init__(self, base_url: str, prompt_id: str, parent=None):
+        super().__init__(parent)
+        self.base_url = base_url.rstrip("/")
+        self.prompt_id = prompt_id
+
+    def run(self):
+        import uuid, json as _json
+        try:
+            import websocket  # websocket-client
+        except ImportError:
+            self.failed.emit(self.prompt_id, "websocket-client not installed")
+            return
+
+        client_id = str(uuid.uuid4())
+        ws_url = self.base_url.replace("https://", "wss://").replace("http://", "ws://")
+        ws_url = f"{ws_url}/ws?clientId={client_id}"
+
+        outputs = []
+        try:
+            ws = websocket.create_connection(ws_url, timeout=300)
+            while True:
+                raw = ws.recv()
+                try:
+                    msg = _json.loads(raw)
+                except Exception:
+                    continue
+                mtype = msg.get("type", "")
+                data  = msg.get("data", {})
+
+                if mtype == "executed" and data.get("prompt_id") == self.prompt_id:
+                    # Collect any audio/video output filenames
+                    node_output = data.get("output", {})
+                    for key in ("audio", "images", "video"):
+                        items = node_output.get(key, [])
+                        for item in items:
+                            fname = item.get("filename", "")
+                            if fname:
+                                outputs.append(fname)
+                    ws.close()
+                    self.finished.emit(self.prompt_id, outputs)
+                    return
+
+                if mtype == "execution_error" and data.get("prompt_id") == self.prompt_id:
+                    ws.close()
+                    self.failed.emit(self.prompt_id, data.get("exception_message", "Unknown error"))
+                    return
+        except Exception as exc:
+            self.failed.emit(self.prompt_id, str(exc))
+
 
 CONFIG_PATH = os.path.normpath(
     os.path.join(os.path.dirname(__file__), "..", "..", "config.json")
@@ -226,14 +281,95 @@ class MainWindow(QMainWindow):
         result = self.comfyui.fill_fields(caption, lyrics, self.state)
         if "error" in result:
             QMessageBox.warning(self, "ComfyUI Error", result["error"])
-        else:
-            song_name = self.output_panel.preset_name.text().strip() or self.state.genre or "Untitled"
-            prompt_id = result.get("prompt_id", "")
-            short_id = prompt_id[:8] if prompt_id else "—"
-            QMessageBox.information(
-                self, "Sent to Nyx",
-                f"Song '{song_name}' queued successfully.\n\nJob ID: {short_id}"
-            )
+            return
+
+        song_name = self.output_panel.preset_name.text().strip() or self.state.genre or "Untitled"
+        prompt_id = result.get("prompt_id", "")
+        short_id  = prompt_id[:8] if prompt_id else "—"
+
+        # Auto-show the exact payload that was sent
+        self._show_sent_payload(caption, lyrics, song_name, short_id)
+
+        # Start generation monitor
+        if prompt_id:
+            self._start_generation_monitor(prompt_id, song_name)
+
+    def _show_sent_payload(self, caption: str, lyrics: str, song_name: str, short_id: str):
+        import json as _json
+        from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTextEdit, QPushButton, QLabel
+        inputs = self.comfyui.build_encoder_inputs(caption, lyrics, self.state)
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle(f"Sent to Nyx — {song_name}")
+        dlg.setMinimumSize(700, 520)
+        layout = QVBoxLayout(dlg)
+
+        header = QLabel(f"Job <b>{short_id}</b> queued. Exact inputs sent to TextEncodeAceStepAudio1.5:")
+        header.setStyleSheet("color: #4caf50; font-size: 11px; padding: 4px 0;")
+        layout.addWidget(header)
+
+        tags_lbl = QLabel("TAGS  (instruments + style):")
+        tags_lbl.setStyleSheet("color: #80c080; font-size: 10px; font-weight: bold;")
+        layout.addWidget(tags_lbl)
+        tags_box = QTextEdit()
+        tags_box.setReadOnly(True)
+        tags_box.setPlainText(inputs["tags"])
+        tags_box.setFixedHeight(80)
+        tags_box.setStyleSheet("background:#1a1a2a; color:#e0e0f0; font-size:11px; border:1px solid #3a3a5c;")
+        layout.addWidget(tags_box)
+
+        lyrics_lbl = QLabel("LYRICS:")
+        lyrics_lbl.setStyleSheet("color: #80c0ff; font-size: 10px; font-weight: bold;")
+        layout.addWidget(lyrics_lbl)
+        lyrics_box = QTextEdit()
+        lyrics_box.setReadOnly(True)
+        lyrics_box.setPlainText(inputs["lyrics"])
+        lyrics_box.setMinimumHeight(180)
+        lyrics_box.setStyleSheet("background:#1a1a2a; color:#e0e0f0; font-size:11px; border:1px solid #3a3a5c;")
+        layout.addWidget(lyrics_box)
+
+        params_lbl = QLabel("PARAMETERS:")
+        params_lbl.setStyleSheet("color: #c0a0ff; font-size: 10px; font-weight: bold;")
+        layout.addWidget(params_lbl)
+        params = {k: v for k, v in inputs.items() if k not in ("tags", "lyrics")}
+        params_box = QTextEdit()
+        params_box.setReadOnly(True)
+        params_box.setPlainText(_json.dumps(params, indent=2))
+        params_box.setFixedHeight(120)
+        params_box.setStyleSheet("background:#1a1a2a; color:#e0e0f0; font-size:11px; border:1px solid #3a3a5c; font-family: monospace;")
+        layout.addWidget(params_box)
+
+        close_btn = QPushButton("Close  (generation continues in background)")
+        close_btn.clicked.connect(dlg.accept)
+        layout.addWidget(close_btn)
+        dlg.exec()
+
+    def _start_generation_monitor(self, prompt_id: str, song_name: str):
+        monitor = _GenerationMonitor(self.comfyui.base_url, prompt_id, self)
+        monitor.finished.connect(lambda pid, files: self._on_generation_done(pid, files, song_name))
+        monitor.failed.connect(lambda pid, err: self._on_generation_failed(pid, err, song_name))
+        monitor.start()
+        # Keep reference so it isn't garbage-collected
+        if not hasattr(self, "_monitors"):
+            self._monitors = []
+        self._monitors.append(monitor)
+
+    def _on_generation_done(self, prompt_id: str, files: list, song_name: str):
+        file_list = "\n".join(files) if files else "(check ComfyUI output folder)"
+        self.output_panel.set_generation_status(f"Done: {song_name}")
+        QMessageBox.information(
+            self, f"Generation Complete — {song_name}",
+            f"Nyx finished generating '{song_name}'.\n\nOutput file(s):\n{file_list}"
+        )
+        # Clean up finished monitors
+        if hasattr(self, "_monitors"):
+            self._monitors = [m for m in self._monitors if m.isRunning()]
+
+    def _on_generation_failed(self, prompt_id: str, error: str, song_name: str):
+        self.output_panel.set_generation_status(f"Error: {song_name}")
+        QMessageBox.warning(self, f"Generation Error — {song_name}", error)
+        if hasattr(self, "_monitors"):
+            self._monitors = [m for m in self._monitors if m.isRunning()]
 
     def _on_save_preset(self, name: str):
         if not name.strip():
