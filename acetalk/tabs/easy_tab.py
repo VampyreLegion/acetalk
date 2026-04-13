@@ -194,9 +194,14 @@ Rules:
 - Use qualifier variants to set energy and production character for each section
 {lyrics_rules}
 Return ONLY valid JSON with exactly two keys:
-- "caption": a comma-separated string of ACE-Step style tags (genre, BPM, key, scale, mode, time signature, instruments{"" if self.instrumental else f", vocal descriptors — modelled on {self.vocalist}'s vocal style"})
+- "caption": a comma-separated string of ACE-Step style tags in this order:
+    1. Band/artist name (e.g. "{self.band}")
+    2. Genre, BPM, key, scale, mode, time signature
+    3. Instruments{"" if self.instrumental else f'''\n    4. Vocalist name as a tag (e.g. "vocals {self.vocalist}" or "{self.vocalist} vocals")
+    5. Descriptive vocal style tags (breathy, powerful, operatic, etc.) — modelled on {self.vocalist}'s actual voice'''}
 - "lyrics": structured song text as described above
 
+The band and vocalist name MUST appear in the caption so the model can use them as style anchors.
 Return ONLY the JSON object. No explanation, no markdown fences.
 """
             resp = requests.post(
@@ -602,6 +607,22 @@ class EasyTab(QWidget):
         self.state.instruments = instruments
         self.state.vocal_tags = vocal_tags
         self.state.lyrics = lyrics
+
+        # Ensure band and vocalist names are in the caption as style anchors.
+        # The AI is instructed to include them, but we guarantee it here too.
+        band_name = self.band_edit.text().strip()
+        vocalist_name = self.vocalist_edit.text().strip()
+        caption_lower = caption.lower()
+        extra_tags = []
+        if band_name and band_name.lower() not in caption_lower:
+            extra_tags.append(band_name)
+        if vocalist_name and not self.instrumental_check.isChecked():
+            vocalist_tag = f"vocals {vocalist_name}"
+            if vocalist_name.lower() not in caption_lower:
+                extra_tags.append(vocalist_tag)
+        if extra_tags:
+            new_caption = ", ".join(extra_tags) + (", " + caption if caption else "")
+            self.caption_edit.setPlainText(new_caption)
 
         self.state_changed.emit()
         self.status_label.setText("Sent to Overview for editing.")
