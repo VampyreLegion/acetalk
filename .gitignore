@@ -26,6 +26,10 @@ venv/
 .venv/
 env/
 
+# Claude Code / tooling internals
+.claude/
+.superpowers/
+
 # IDE
 .vscode/
 .idea/
