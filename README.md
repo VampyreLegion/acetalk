@@ -35,6 +35,8 @@ cp -r AceTalkBridge/ /path/to/ComfyUI/custom_nodes/AceTalkBridge
 ### Ollama
 AI lyric generation via `http://localhost:11434`. Any installed Ollama model appears in the Lyrics and Easy tab model selectors. Generation streams token-by-token. Supports `<think>...</think>` stripping for reasoning models (Qwen3, etc.). Optional — you can write lyrics manually.
 
+**Default model:** set `preferred_model` in `config.json` (default: `gemma4:latest`). Both the Easy tab and Lyrics tab auto-select it on launch if that model is available.
+
 ### Brave Search / DuckDuckGo
 Used in the Easy tab and Vocals tab to research bands and singers. Priority order:
 1. Local `vocals.json` database (instant, offline)
@@ -102,6 +104,8 @@ Open **Settings** (⚙ gear icon, top toolbar):
 
 Click **Test ComfyUI** to verify. Settings are saved to `config.json`.
 
+To change the default Ollama model, add `"preferred_model": "yourmodel:tag"` directly to `config.json`.
+
 ---
 
 ## Tabs
@@ -123,6 +127,13 @@ Enter a **band/artist** and **vocalist**, optionally a topic, mood, subject, and
 3. Receives a full ACE-Step caption + structured lyrics
 4. Parses the caption to extract genre, BPM, key, instruments, vocal tags
 5. Populates all tabs automatically and switches to Overview for review
+
+#### Style / Genre dropdown
+Select a genre from the **Style / Genre** dropdown to anchor the output to a specific sound. When a genre is selected:
+- The **Instruments** row instantly shows that genre's typical instruments
+- The AI prompt includes the genre's description, instrument list, BPM range, and ACE-Step tags as a foundation — the band's character is layered on top
+
+Leave it on **— let AI decide —** to let the model infer everything from the band/vocalist research.
 
 Use Easy to get a complete starting point in one click.
 
