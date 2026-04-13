@@ -108,10 +108,12 @@ class ComfyUIClient:
                 node.setdefault("inputs", {})["steps"] = state.steps
 
         # Determine seed — use locked seed or generate fresh random
-        if state.lock_seed and state.seed >= 0:
-            new_seed = state.seed
+        # Keep within int32 range (ComfyUI nodes use int32 internally)
+        MAX_SEED = 2**31 - 1
+        if state.lock_seed:
+            new_seed = max(0, min(state.seed, MAX_SEED))
         else:
-            new_seed = random.randint(0, 2**32 - 1)
+            new_seed = random.randint(0, MAX_SEED)
             state.seed = new_seed  # store so UI can display it
 
         for node in workflow.values():

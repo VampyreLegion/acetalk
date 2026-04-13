@@ -146,10 +146,10 @@ class ParametersTab(QWidget):
         seed_lbl.setToolTip("Lock seed to reproduce the same generation and iterate with small changes.")
         self.seed_spin = QSpinBox()
         self.seed_spin.setRange(0, 2**31 - 1)
-        self.seed_spin.setValue(max(0, self.state.seed))
         self.seed_spin.setFixedWidth(120)
         self.seed_spin.setToolTip("Seed value used for generation.")
         self.seed_spin.valueChanged.connect(self._on_seed_changed)
+        self.seed_spin.setValue(self.state.seed)  # connect signal first, then set value
 
         self.lock_check = QCheckBox("Lock seed (iterate on same base)")
         self.lock_check.setChecked(self.state.lock_seed)
@@ -183,6 +183,9 @@ class ParametersTab(QWidget):
 
     def _on_lock_changed(self, state):
         self.state.lock_seed = self.lock_check.isChecked()
+        # Auto-generate a seed the moment the user locks, so they have something to work with
+        if self.state.lock_seed and self.state.seed == 0:
+            self._randomize_seed()
         self.state_changed.emit()
 
     def _randomize_seed(self):
