@@ -20,6 +20,18 @@ from PyQt6.QtGui import QFont
 from ..core.state import SessionState
 from ..core.llm import list_models
 
+GENRES_PATH = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), "..", "data", "genres.json")
+)
+
+
+def _load_genres() -> list:
+    try:
+        with open(GENRES_PATH) as f:
+            return json.load(f).get("genres", [])
+    except Exception:
+        return []
+
 logger = logging.getLogger(__name__)
 
 CARD_STYLE = """
@@ -72,7 +84,8 @@ class _ResearchWorker(QThread):
     result_ready = pyqtSignal(str, str)   # (caption, lyrics)
     error = pyqtSignal(str)
 
-    def __init__(self, band, vocalist, topic, mood, name_override, structure, model, ollama_url):
+    def __init__(self, band, vocalist, topic, mood, name_override, structure, model, ollama_url,
+                 style_genre: dict = None):
         super().__init__()
         self.band = band
         self.vocalist = vocalist
@@ -82,6 +95,7 @@ class _ResearchWorker(QThread):
         self.structure = structure
         self.model = model
         self.ollama_url = ollama_url
+        self.style_genre = style_genre  # dict from genres.json, or None
 
     def run(self):
         try:
@@ -107,6 +121,23 @@ class _ResearchWorker(QThread):
             topic_instruction = f"Song topic: {self.topic}." if self.topic else ""
             mood_instruction = f"Mood/vibe: {self.mood}." if self.mood else ""
 
+            # Style / genre hint
+            style_block = ""
+            if self.style_genre:
+                g = self.style_genre
+                instruments = ", ".join(g.get("typical_instruments", []))
+                bpm_hint = f"{g.get('bpm_min', 60)}–{g.get('bpm_max', 160)} BPM"
+                style_block = (
+                    f"\nSTYLE OVERRIDE — the user has selected '{g['name']}' as the target genre.\n"
+                    f"  Description: {g.get('description', '')}\n"
+                    f"  Typical instruments: {instruments}\n"
+                    f"  Typical BPM range: {bpm_hint}\n"
+                    f"  Default key: {g.get('default_key', 'C')} {g.get('default_scale', 'Major')}\n"
+                    f"  ACE-Step tags for this genre: {', '.join(g.get('tags', []))}\n"
+                    f"Use these instruments and tags as the foundation for the caption. "
+                    f"The caption should feel like {g['name']} first, with {self.band}'s character layered on top.\n"
+                )
+
             prompt = f"""You are a professional music producer and lyricist specialising in ACE-Step 1.5 AI music generation.
 
 BAND RESEARCH for "{self.band}":
@@ -114,7 +145,7 @@ BAND RESEARCH for "{self.band}":
 
 VOCALIST RESEARCH for "{self.vocalist}":
 {vocalist_text[:1000]}
-
+{style_block}
 TASK:
 Using the research above, create a complete ACE-Step 1.5 music prompt.
 {topic_instruction}
@@ -176,6 +207,7 @@ class EasyTab(QWidget):
         self.state = state
         self.config = config
         self._worker = None
+        self._genres = _load_genres()
         self._build_ui()
 
     def _build_ui(self):
@@ -216,6 +248,40 @@ class EasyTab(QWidget):
         self.vocalist_edit.setPlaceholderText("e.g. Roger Waters, Elizabeth Fraser, Billie Eilish")
         row2.addWidget(self.vocalist_edit)
         input_layout.addLayout(row2)
+
+        # Style / genre selector
+        row_style = QHBoxLayout()
+        row_style.addWidget(self._lbl("Style / Genre"))
+        self.style_combo = QComboBox()
+        self.style_combo.setStyleSheet(INPUT_STYLE)
+        self.style_combo.setMinimumWidth(220)
+        self.style_combo.addItem("— let AI decide —", userData=None)
+        # Group by parent category
+        current_parent = None
+        for g in sorted(self._genres, key=lambda x: (x.get("parent", ""), x["name"])):
+            parent = g.get("parent", "Other")
+            if parent != current_parent:
+                # Separator label item (disabled)
+                self.style_combo.addItem(f"── {parent} ──", userData=None)
+                idx = self.style_combo.count() - 1
+                self.style_combo.model().item(idx).setEnabled(False)
+                current_parent = parent
+            self.style_combo.addItem(g["name"], userData=g)
+        self.style_combo.currentIndexChanged.connect(self._on_style_changed)
+        row_style.addWidget(self.style_combo)
+        row_style.addStretch()
+        input_layout.addLayout(row_style)
+
+        # Instruments display for selected style
+        inst_row = QHBoxLayout()
+        inst_row.addWidget(self._lbl("Instruments"))
+        self.instruments_label = QLabel("Select a style above to see typical instruments.")
+        self.instruments_label.setStyleSheet(
+            "color: #80c0a0; font-size: 10px; border: none; padding: 2px 0;"
+        )
+        self.instruments_label.setWordWrap(True)
+        inst_row.addWidget(self.instruments_label)
+        input_layout.addLayout(inst_row)
 
         row3 = QHBoxLayout()
         row3.addWidget(self._lbl("Song Topic"))
@@ -339,6 +405,14 @@ class EasyTab(QWidget):
         self.model_combo.clear()
         self.model_combo.addItems(models)
 
+    def _on_style_changed(self, index: int):
+        genre = self.style_combo.itemData(index)
+        if genre:
+            instruments = genre.get("typical_instruments", [])
+            self.instruments_label.setText(", ".join(instruments) if instruments else "—")
+        else:
+            self.instruments_label.setText("Select a style above to see typical instruments.")
+
     def _start(self):
         band = self.band_edit.text().strip()
         vocalist = self.vocalist_edit.text().strip()
@@ -355,6 +429,8 @@ class EasyTab(QWidget):
         self.lyrics_edit.clear()
         ollama_url = self.config.get("ollama_url", "http://localhost:11434")
 
+        selected_genre = self.style_combo.currentData()  # dict or None
+
         self._worker = _ResearchWorker(
             band=band,
             vocalist=vocalist,
@@ -364,6 +440,7 @@ class EasyTab(QWidget):
             structure=self.structure_combo.currentText(),
             model=model,
             ollama_url=ollama_url,
+            style_genre=selected_genre,
         )
         self._worker.status_update.connect(self._on_status)
         self._worker.result_ready.connect(self._on_result)
