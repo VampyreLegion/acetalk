@@ -54,9 +54,10 @@ class _OllamaWorker(QThread):
 class LyricsTab(QWidget):
     state_changed = pyqtSignal()
 
-    def __init__(self, state, parent=None):
+    def __init__(self, state, config: dict = None, parent=None):
         super().__init__(parent)
         self.state = state
+        self.config = config or {}
         self._templates = self._load_templates()
         self._worker = None
         self._build_ui()
@@ -170,6 +171,9 @@ class LyricsTab(QWidget):
         models = list_models()
         self.model_combo.clear()
         self.model_combo.addItems(models)
+        preferred = self.config.get("preferred_model", "gemma4:latest")
+        if preferred in models:
+            self.model_combo.setCurrentText(preferred)
 
     def _apply_template(self):
         structure_key = self.structure_combo.currentText()

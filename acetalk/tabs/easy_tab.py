@@ -404,6 +404,9 @@ class EasyTab(QWidget):
         models = list_models()
         self.model_combo.clear()
         self.model_combo.addItems(models)
+        preferred = self.config.get("preferred_model", "gemma4:latest")
+        if preferred in models:
+            self.model_combo.setCurrentText(preferred)
 
     def _on_style_changed(self, index: int):
         genre = self.style_combo.itemData(index)

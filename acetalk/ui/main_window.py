@@ -148,7 +148,7 @@ class MainWindow(QMainWindow):
         self.vocalist_tab.state_changed.connect(self.refresh_output)
         self.tabs.addTab(self.vocalist_tab, "Vocals")
 
-        self.lyrics_tab = LyricsTab(self.state)
+        self.lyrics_tab = LyricsTab(self.state, config=self.config)
         self.lyrics_tab.state_changed.connect(self.refresh_output)
         self.tabs.addTab(self.lyrics_tab, "Lyrics")
 
