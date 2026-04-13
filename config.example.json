@@ -1,5 +1,6 @@
 {
     "comfyui_url": "http://127.0.0.1:8188",
     "ollama_url": "http://localhost:11434",
-    "brave_api_key": ""
+    "brave_api_key": "",
+    "preferred_model": "gemma4:latest"
 }

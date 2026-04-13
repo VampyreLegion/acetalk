@@ -121,19 +121,29 @@ A fully editable summary of the entire song. All fields from all tabs are shown 
 - Read-only assembled caption (shows the final tags string in green)
 
 ### Easy
-Enter a **band/artist** and **vocalist**, optionally a topic, mood, subject, and name override. Click **Research + Generate**:
+Enter a **band/artist** and **vocalist**, optionally a topic, mood, subject, and name override. Click **Research & Generate**:
 1. Web-searches both the band and vocalist
-2. Sends results to Ollama with your guidance fields
-3. Receives a full ACE-Step caption + structured lyrics
+2. Sends results to Ollama along with any style/genre selection and guidance fields
+3. Receives a full ACE-Step caption + structured lyrics written in the band's lyrical voice
 4. Parses the caption to extract genre, BPM, key, instruments, vocal tags
-5. Populates all tabs automatically and switches to Overview for review
+5. Refreshes **all** editing tabs (Style, Instruments, Vocals, Lyrics, Parameters) with the parsed data
+6. Switches to Overview for review and final edits
+
+#### Artist name tags
+The generated caption always includes the band name and vocalist name as style anchors (e.g. `Evanescence, vocals Amy Lee`). ACE-Step's text encoder responds to known artist names — they steer the vocal character and overall production feel, especially for well-known artists. Descriptive tags (`breathy, powerful, operatic`) are also included so the model has both a name anchor and a fallback description.
+
+#### Lyrical style
+Lyrics are written to sound like the selected band — matching their typical themes, imagery, poetic devices, and the vocalist's phrasing and cadence. The output should feel like a real song from that artist, not a generic composition.
 
 #### Style / Genre dropdown
-Select a genre from the **Style / Genre** dropdown to anchor the output to a specific sound. When a genre is selected:
+Select a genre from the **Style / Genre** dropdown to anchor the output to a specific sound:
 - The **Instruments** row instantly shows that genre's typical instruments
-- The AI prompt includes the genre's description, instrument list, BPM range, and ACE-Step tags as a foundation — the band's character is layered on top
+- The AI prompt receives the genre's description, instrument list, BPM range, and ACE-Step tags as a foundation — the band's character is layered on top
 
 Leave it on **— let AI decide —** to let the model infer everything from the band/vocalist research.
+
+#### Instrumental Only
+Check **Instrumental Only** before generating to skip lyrics entirely. The lyrics field is set to `[Instrumental]`, vocal descriptors are removed from the caption, and the output is structured around instruments and production only.
 
 Use Easy to get a complete starting point in one click.
 
@@ -346,31 +356,55 @@ python3 -m pytest tests/ -v
 ## How ACE-Step Prompting Works
 
 ### Tags string
-Comma-separated descriptors. Genre and tempo first, then harmonic context, then instrumentation.
+Comma-separated descriptors. Recommended order: artist/band name → genre → tempo → harmonic context → instrumentation → vocal style.
 
 ```
-psytrance, 145 BPM, A Minor, Phrygian mode, 4/4 time, TB-303 synth bass,
-layered analog pads, electronic drums, tribal percussion, female vocal, breathy, airy
+Evanescence, vocals Amy Lee, gothic rock, 90 BPM, A Minor, 4/4 time,
+distorted electric guitar, orchestral strings, grand piano, electronic drums,
+female vocal, powerful, breathy, operatic
+```
+
+**Artist name tags** — ACE-Step's text encoder was trained on music descriptions that include artist references. Including the band name and vocalist name (e.g. `vocals Amy Lee`) steers the vocal character and production style. Well-known artists have strong influence; lesser-known artists benefit more from descriptive tags alongside the name.
+
+**Instrumental caption** (no vocals):
+```
+Evanescence, gothic rock, 90 BPM, A Minor, 4/4 time,
+distorted electric guitar, orchestral strings, grand piano, electronic drums
 ```
 
 ### Lyrics
-Section tags guide the model's structural and energy planning.
+Section tags guide the model's structural and energy planning. Every section starts with a tag on its own line.
 
 ```
 [Intro: Atmospheric]
 The forest breathes in silence
 
-[Build: Heavy]
-Frequencies collide, the signal finds the spine
+[Verse: Intimate]
+She walks the edge of sleep and waking
+A voice that calls from somewhere underground
 
-[Drop: Virtuosic]
-Let it rise, let it fall
+[Chorus: Anthemic]
+Rise above the noise, the static, the rain
+Let me hear your voice say my name
 
-[Outro]
+[Guitar Solo: Virtuosic]
+
+[Bridge: Haunting]
+Everything I was, dissolves to ash
+
+[Outro: Fading]
 The pulse dissolves to static
 ```
 
-Qualifiers like `: Anthemic`, `: Dark`, `: Modulated` give production direction for each section.
+**Available structural tags:**
+
+| Category | Tags |
+|---|---|
+| Structure | `[Intro]` `[Verse]` `[Pre-Chorus]` `[Chorus]` `[Bridge]` `[Outro]` |
+| Energy / Production | `[Build]` `[Drop]` `[Breakdown]` `[Fade Out]` `[Silence]` |
+| Performance | `[Guitar Solo]` `[Piano Interlude]` `[Drum Break]` `[Solo]` `[Instrumental]` |
+
+Append `: descriptor` to any tag for production direction: `[Chorus: Anthemic]`, `[Build: Heavy]`, `[Drop: Euphoric]`, `[Verse: Intimate]`, `[Bridge: Haunting]`, `[Solo: Virtuosic]`, `[Breakdown: Sparse]`, `[Outro: Fading]`.
 
 ---
 
