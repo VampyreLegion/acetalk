@@ -1,5 +1,4 @@
 import json
-import os
 
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QFormLayout, QLineEdit,
