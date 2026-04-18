@@ -1,3 +1,4 @@
+import os as _os
 import subprocess
 import sys
 from pathlib import Path
@@ -28,6 +29,9 @@ class DemucsWorker(QThread):
     def _collect_stems(self) -> list:
         track_name = Path(self.input_path).stem
         stem_dir = Path(self.output_dir) / self.model / track_name
+        if not stem_dir.exists():
+            self.log_line.emit(f"[warn] stem directory not found: {stem_dir}")
+            return []
         stems = sorted(str(p) for p in stem_dir.glob("*.mp3"))
         if not stems:
             stems = sorted(str(p) for p in stem_dir.glob("*.wav"))
@@ -41,11 +45,14 @@ class DemucsWorker(QThread):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
+                bufsize=1,
+                env={**_os.environ, "PYTHONUNBUFFERED": "1"},
             )
             for line in iter(proc.stdout.readline, ""):
                 stripped = line.rstrip()
                 if stripped:
                     self.log_line.emit(stripped)
+            proc.stdout.close()
             proc.wait()
         except Exception as exc:
             self.failed.emit(str(exc))

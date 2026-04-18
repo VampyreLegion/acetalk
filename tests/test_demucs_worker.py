@@ -1,5 +1,4 @@
 import sys
-from unittest.mock import patch, MagicMock, call
 from acetalk.core.demucs_worker import DemucsWorker
 
 
