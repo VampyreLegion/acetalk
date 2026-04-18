@@ -166,3 +166,74 @@ class ComfyUIClient:
             pass
 
         return result
+
+    def _default_input_dir(self) -> str:
+        """Resolve ComfyUI's input/ folder relative to this file's location."""
+        import os
+        comfy_root = os.path.normpath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "..")
+        )
+        return os.path.join(comfy_root, "input")
+
+    def _default_extract_template_path(self) -> str:
+        import os
+        return os.path.normpath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "workflow_extract_template.json")
+        )
+
+    def copy_to_comfyui_input(self, src_path: str, input_dir: str = None) -> str:
+        """
+        Copy src_path into ComfyUI's input directory.
+        Returns the bare filename (what LoadAudio expects).
+        """
+        import shutil, os
+        dest_dir = input_dir or self._default_input_dir()
+        os.makedirs(dest_dir, exist_ok=True)
+        filename = os.path.basename(src_path)
+        dest = os.path.join(dest_dir, filename)
+        shutil.copy2(src_path, dest)
+        return filename
+
+    def build_extract_workflow(
+        self,
+        input_filename: str,
+        state: "SessionState",
+        template_path: str = None,
+    ) -> dict:
+        """
+        Load workflow_extract_template.json, patch the LoadAudio filename and
+        KSampler steps/seed, return {"workflow": {...}} or {"error": "..."}.
+        """
+        import os, json as _json, random
+
+        path = template_path or self._default_extract_template_path()
+        if not os.path.exists(path):
+            return {
+                "error": (
+                    "No extract workflow template found.\n\n"
+                    "Build the ACE-Step extract workflow in ComfyUI, export as API format, "
+                    f"and save to:\n  {path}"
+                )
+            }
+
+        with open(path) as f:
+            workflow = _json.load(f)
+
+        for node in workflow.values():
+            if not isinstance(node, dict):
+                continue
+            ct = node.get("class_type", "")
+            inputs = node.setdefault("inputs", {})
+            if ct == "LoadAudio":
+                inputs["filename"] = input_filename
+            if ct == "KSampler":
+                inputs["steps"] = state.steps
+                MAX_SEED = 2**31 - 1
+                if state.lock_seed:
+                    inputs["seed"] = max(0, min(state.seed, MAX_SEED))
+                else:
+                    new_seed = random.randint(0, MAX_SEED)
+                    state.seed = new_seed
+                    inputs["seed"] = new_seed
+
+        return {"workflow": workflow}
