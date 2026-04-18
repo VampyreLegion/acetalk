@@ -64,10 +64,10 @@ class StemsTab(QWidget):
         layout.addWidget(self.extract_status)
 
         # Send button
-        send_btn = QPushButton("Send Extract Job to ComfyUI")
-        send_btn.setStyleSheet("background:#1a3a2a; color:#80f0a0; font-weight:bold; padding:6px 16px;")
-        send_btn.clicked.connect(self._on_send_extract)
-        layout.addWidget(send_btn)
+        self.send_btn = QPushButton("Send Extract Job to ComfyUI")
+        self.send_btn.setStyleSheet("background:#1a3a2a; color:#80f0a0; font-weight:bold; padding:6px 16px;")
+        self.send_btn.clicked.connect(self._on_send_extract)
+        layout.addWidget(self.send_btn)
 
         return group
 
@@ -158,6 +158,7 @@ class StemsTab(QWidget):
             QMessageBox.warning(self, "No file", "Select a valid audio file first.")
             return
 
+        self.send_btn.setEnabled(False)
         self.extract_status.setPlainText("Copying file to ComfyUI input folder…")
         try:
             filename = self.comfyui.copy_to_comfyui_input(src)
@@ -189,11 +190,13 @@ class StemsTab(QWidget):
             self._generation_monitor = monitor
 
     def _on_extract_done(self, prompt_id: str, files: list):
+        self.send_btn.setEnabled(True)
         self.extract_status.setPlainText(
             "Extract complete.\nOutput: " + (", ".join(files) or "(check ComfyUI output/stems/)")
         )
 
     def _on_extract_failed(self, prompt_id: str, error: str):
+        self.send_btn.setEnabled(True)
         self.extract_status.setPlainText(f"Extract failed: {error}")
 
     # ------------------------------------------------------------------
@@ -221,6 +224,7 @@ class StemsTab(QWidget):
             return  # already running
 
         output_dir = self._resolve_output_dir()
+        self.output_path_label.setText(f"Output: {output_dir}")
         os.makedirs(output_dir, exist_ok=True)
 
         self.demucs_log.clear()
@@ -244,7 +248,13 @@ class StemsTab(QWidget):
             self.demucs_log.append(f"  {s}")
         if not stems:
             self.demucs_log.append("  (check output directory)")
+        if self._demucs_worker:
+            self._demucs_worker.deleteLater()
+            self._demucs_worker = None
 
     def _on_demucs_failed(self, error: str):
         self.demucs_log.append(f"\nError: {error}")
         QMessageBox.warning(self, "Demucs Error", error)
+        if self._demucs_worker:
+            self._demucs_worker.deleteLater()
+            self._demucs_worker = None
