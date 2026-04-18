@@ -40,6 +40,10 @@ class SessionState:
     seed: int = 0            # seed used for generation
     lock_seed: bool = False  # True = reuse seed for iterative refinement
 
+    # Stem separation
+    stems_auto_separate: bool = False   # run demucs automatically after generation
+    stems_model: str = "htdemucs"       # "htdemucs" (4-stem) or "htdemucs_6s" (6-stem)
+
     def to_dict(self) -> dict:
         return asdict(self)
 

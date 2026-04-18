@@ -45,3 +45,17 @@ def test_from_dict_does_not_alias_lists():
     s = SessionState.from_dict(d)
     d["instruments"].append("mutated")
     assert s.instruments == ["TB-303 bass"]
+
+
+def test_stem_defaults():
+    s = SessionState()
+    assert s.stems_auto_separate is False
+    assert s.stems_model == "htdemucs"
+
+
+def test_stem_fields_round_trip():
+    s = SessionState(stems_auto_separate=True, stems_model="htdemucs_6s")
+    d = s.to_dict()
+    s2 = SessionState.from_dict(d)
+    assert s2.stems_auto_separate is True
+    assert s2.stems_model == "htdemucs_6s"
