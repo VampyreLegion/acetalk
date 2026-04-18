@@ -9,6 +9,7 @@ CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.json")
 DEFAULT_CONFIG = {
     "comfyui_url": "http://127.0.0.1:8188",
     "brave_api_key": "",
+    "stems_output_path": "",
 }
 
 

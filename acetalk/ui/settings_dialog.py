@@ -1,8 +1,10 @@
 import json
+import os
 
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QFormLayout, QLineEdit,
     QPushButton, QHBoxLayout, QLabel, QDialogButtonBox,
+    QFileDialog,
 )
 
 
@@ -12,7 +14,7 @@ class SettingsDialog(QDialog):
         self.config = config
         self.config_path = config_path
         self.setWindowTitle("Settings")
-        self.setMinimumWidth(480)
+        self.setMinimumWidth(520)
         self._build_ui()
 
     def _build_ui(self):
@@ -27,6 +29,16 @@ class SettingsDialog(QDialog):
         form.addRow("Brave API Key:", self.brave_key)
 
         root.addLayout(form)
+
+        # Stem output path row
+        stem_row = QHBoxLayout()
+        self.stems_path = QLineEdit(self.config.get("stems_output_path", ""))
+        self.stems_path.setPlaceholderText("Leave blank for ComfyUI output/audio/separated/")
+        browse_btn = QPushButton("Browse…")
+        browse_btn.clicked.connect(self._browse_stems_path)
+        stem_row.addWidget(self.stems_path)
+        stem_row.addWidget(browse_btn)
+        form.addRow("Stem Output Path:", stem_row)
 
         test_row = QHBoxLayout()
         self.test_btn = QPushButton("Test ComfyUI")
@@ -44,6 +56,11 @@ class SettingsDialog(QDialog):
         buttons.rejected.connect(self.reject)
         root.addWidget(buttons)
 
+    def _browse_stems_path(self):
+        path = QFileDialog.getExistingDirectory(self, "Select Stem Output Folder")
+        if path:
+            self.stems_path.setText(path)
+
     def _test_connection(self):
         from acetalk.core.comfyui_api import ping
         online = ping(self.comfyui_url.text().rstrip("/"))
@@ -57,6 +74,7 @@ class SettingsDialog(QDialog):
     def _save_and_accept(self):
         self.config["comfyui_url"] = self.comfyui_url.text().strip()
         self.config["brave_api_key"] = self.brave_key.text().strip()
+        self.config["stems_output_path"] = self.stems_path.text().strip()
         with open(self.config_path, "w") as f:
             json.dump(self.config, f, indent=2)
         self.accept()
