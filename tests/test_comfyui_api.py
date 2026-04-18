@@ -1,4 +1,5 @@
 from unittest.mock import patch, MagicMock
+import pytest
 from acetalk.core.comfyui_api import ping, ComfyUIClient
 try:
     from acetalk.core.comfyui_api import queue_workflow
@@ -19,6 +20,7 @@ def test_ping_returns_false_when_offline():
         assert ping() is False
 
 
+@pytest.mark.skipif(queue_workflow is None, reason="queue_workflow not present in this build")
 def test_queue_workflow_posts_to_prompt_endpoint():
     mock_resp = MagicMock()
     mock_resp.json.return_value = {"prompt_id": "abc123"}
@@ -42,8 +44,6 @@ def test_client_uses_configured_url():
 
 import os
 import json
-import shutil
-import tempfile
 
 
 def test_copy_to_comfyui_input_copies_file(tmp_path):
@@ -95,3 +95,30 @@ def test_build_extract_workflow_returns_error_when_no_template(tmp_path):
         template_path=str(tmp_path / "missing.json"),
     )
     assert "error" in result
+
+
+def test_build_extract_workflow_uses_random_seed_when_unlocked(tmp_path):
+    template = {
+        "1": {
+            "class_type": "LoadAudio",
+            "inputs": {"filename": "placeholder.mp3"}
+        },
+        "2": {
+            "class_type": "KSampler",
+            "inputs": {"seed": 0, "steps": 8}
+        },
+    }
+    template_path = tmp_path / "workflow_extract_template.json"
+    template_path.write_text(json.dumps(template))
+
+    state = SessionState(seed=0, lock_seed=False)
+    client = ComfyUIClient()
+    result = client.build_extract_workflow(
+        input_filename="track.mp3",
+        state=state,
+        template_path=str(template_path),
+    )
+    assert "workflow" in result
+    workflow_seed = result["workflow"]["2"]["inputs"]["seed"]
+    assert workflow_seed > 0
+    assert state.seed == workflow_seed  # state was mutated
