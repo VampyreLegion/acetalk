@@ -416,7 +416,7 @@ class MainWindow(QMainWindow):
         if self.state.stems_auto_separate and files:
             import os, glob as _glob
             comfy_root = os.path.normpath(
-                os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+                os.path.join(os.path.dirname(__file__), "..", "..", "..")
             )
             audio_dir = os.path.join(comfy_root, "output", "audio")
             pattern = os.path.join(audio_dir, "*.mp3")
@@ -459,6 +459,7 @@ class MainWindow(QMainWindow):
         self.lyrics_tab.editor.setPlainText(self.state.lyrics)
         self.parameters_tab.state = self.state
         self.stems_tab.state = self.state
+        self.stems_tab.sync_from_state()
         self.refresh_output()
 
     def _open_settings(self):

@@ -127,13 +127,13 @@ class StemsTab(QWidget):
         if configured:
             return configured
         comfy_root = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+            os.path.join(os.path.dirname(__file__), "..", "..", "..")
         )
         return os.path.join(comfy_root, "output", "audio", "separated")
 
     def _find_last_mp3(self) -> str | None:
         comfy_root = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+            os.path.join(os.path.dirname(__file__), "..", "..", "..")
         )
         audio_dir = os.path.join(comfy_root, "output", "audio")
         pattern = os.path.join(audio_dir, "*.mp3")
@@ -210,6 +210,16 @@ class StemsTab(QWidget):
     def _on_auto_changed(self):
         self.state.stems_auto_separate = self.auto_check.isChecked()
         self.state_changed.emit()
+
+    def sync_from_state(self):
+        """Refresh widgets from state — call after a preset load replaces self.state."""
+        idx = 1 if self.state.stems_model == "htdemucs_6s" else 0
+        self.model_combo.blockSignals(True)
+        self.model_combo.setCurrentIndex(idx)
+        self.model_combo.blockSignals(False)
+        self.auto_check.blockSignals(True)
+        self.auto_check.setChecked(self.state.stems_auto_separate)
+        self.auto_check.blockSignals(False)
 
     def _on_separate_last(self):
         path = self._find_last_mp3()
