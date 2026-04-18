@@ -3,3 +3,4 @@ requests
 duckduckgo-search
 pytest
 pytest-qt
+demucs
