@@ -12,14 +12,16 @@ def test_defaults():
     assert s.instruments == []
     assert s.vocal_tags == []
     assert s.lyrics == ""
-    assert s.cfg_scale == 7.0
-    assert s.temperature == 1.0
-    assert s.top_p == 0.95
-    assert s.top_k == 50
-    assert s.min_p == 0.05
-    assert s.duration == 30
-    assert s.steps == 60
+    assert s.cfg_scale == 2.0
+    assert s.temperature == 0.85
+    assert s.top_p == 0.9
+    assert s.top_k == 0
+    assert s.min_p == 0.0
+    assert s.duration == 120
+    assert s.steps == 8
     assert s.task_type == "text2music"
+    assert s.stems_auto_separate is False
+    assert s.stems_model == "htdemucs"
 
 
 def test_round_trip():
