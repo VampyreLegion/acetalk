@@ -156,6 +156,11 @@ class MainWindow(QMainWindow):
         self.parameters_tab.state_changed.connect(self.refresh_output)
         self.tabs.addTab(self.parameters_tab, "Parameters")
 
+        from ..tabs.stems_tab import StemsTab
+        self.stems_tab = StemsTab(self.state, self.config, self.comfyui)
+        self.stems_tab.state_changed.connect(self.refresh_output)
+        self.tabs.addTab(self.stems_tab, "Stems")
+
     def _add_toolbar(self):
         tb = QToolBar("Main")
         self.addToolBar(tb)
@@ -405,9 +410,20 @@ class MainWindow(QMainWindow):
             self, f"Generation Complete — {song_name}",
             f"Nyx finished generating '{song_name}'.\n\nOutput file(s):\n{file_list}"
         )
-        # Clean up finished monitors
         if hasattr(self, "_monitors"):
             self._monitors = [m for m in self._monitors if m.isRunning()]
+
+        if self.state.stems_auto_separate and files:
+            import os, glob as _glob
+            comfy_root = os.path.normpath(
+                os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+            )
+            audio_dir = os.path.join(comfy_root, "output", "audio")
+            pattern = os.path.join(audio_dir, "*.mp3")
+            mp3s = sorted(_glob.glob(pattern), key=os.path.getmtime, reverse=True)
+            if mp3s:
+                self.tabs.setCurrentWidget(self.stems_tab)
+                self.stems_tab.run_demucs(mp3s[0])
 
     def _on_generation_failed(self, prompt_id: str, error: str, song_name: str):
         self.output_panel.set_generation_status(f"Error: {song_name}")
@@ -442,6 +458,7 @@ class MainWindow(QMainWindow):
         self.lyrics_tab.state = self.state
         self.lyrics_tab.editor.setPlainText(self.state.lyrics)
         self.parameters_tab.state = self.state
+        self.stems_tab.state = self.state
         self.refresh_output()
 
     def _open_settings(self):
