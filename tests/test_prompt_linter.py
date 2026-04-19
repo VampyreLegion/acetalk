@@ -96,6 +96,16 @@ def test_tags_single_tempo_ok():
     assert not any(r.field == "tags" and "empo" in r.message for r in results)
 
 
+def test_tags_introverted_not_section_keyword():
+    results = lint(tags="introverted, guitar, ambient")
+    assert not any(r.field == "tags" and r.severity == "error" and "keyword" in r.message.lower() for r in results)
+
+
+def test_tags_slowcore_not_tempo_conflict():
+    results = lint(tags="slowcore, guitar, electric")
+    assert not any(r.field == "tags" and "empo" in r.message for r in results)
+
+
 # ── Lyrics: no structural brackets ───────────────────────────────────────────
 
 def test_lyrics_no_brackets_tip():

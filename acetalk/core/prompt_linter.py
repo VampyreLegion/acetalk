@@ -86,7 +86,11 @@ class PromptLinter:
 
         for t in tokens:
             tl = t.lower()
-            matched = next((kw for kw in _SECTION_KEYWORDS if kw in tl), None)
+            matched = next(
+                (kw for kw in _SECTION_KEYWORDS
+                 if re.search(r'\b' + re.escape(kw) + r'\b', tl)),
+                None,
+            )
             if matched:
                 results.append(LintResult(
                     "error", "tags",
@@ -117,9 +121,9 @@ class PromptLinter:
                 "Remove duplicates to free attention budget for more descriptors",
             ))
 
-        tags_lower = tags.lower()
-        has_slow = any(w in tags_lower for w in _TEMPO_SLOW)
-        has_fast = any(w in tags_lower for w in _TEMPO_FAST)
+        token_set = {t.lower() for t in tokens}
+        has_slow = bool(token_set & _TEMPO_SLOW)
+        has_fast = bool(token_set & _TEMPO_FAST)
         if has_slow and has_fast:
             results.append(LintResult(
                 "warning", "tags",
@@ -139,7 +143,7 @@ class PromptLinter:
         if not lyrics.strip():
             return
 
-        if lyrics.strip() and not structural:
+        if not structural:
             results.append(LintResult(
                 "tip", "lyrics",
                 "No structural brackets found",
@@ -182,7 +186,7 @@ class PromptLinter:
                 results.append(LintResult(
                     "warning", "lyrics",
                     f"Unrecognized language code [{code}]",
-                    "Valid codes: [zh] [ko] [es] [fr] [de] [ja]",
+                    "Supported ACE-Step codes: [zh] [ko] [es] [fr] [de] [ja] [en]",
                 ))
 
         outro_match = re.search(r'\[Outro\]', lyrics, re.IGNORECASE)
