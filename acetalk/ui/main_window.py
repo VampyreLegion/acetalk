@@ -468,6 +468,7 @@ class MainWindow(QMainWindow):
         self.parameters_tab.state = self.state
         self.stems_tab.state = self.state
         self.stems_tab.sync_from_state()
+        self.lint_tab.state = self.state
         self.refresh_output()
 
     def _open_settings(self):
