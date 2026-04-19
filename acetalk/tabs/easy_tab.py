@@ -70,7 +70,7 @@ def _web_search(query: str) -> str:
         except Exception as exc:
             logger.warning("Brave failed: %s", exc)
     try:
-        from duckduckgo_search import DDGS
+        from ddgs import DDGS
         with DDGS(timeout=10) as ddgs:
             results = ddgs.text(query, max_results=6)
             return " ".join(r.get("body", "") for r in results)
