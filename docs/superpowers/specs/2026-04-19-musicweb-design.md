@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-19  
 **Status:** Approved  
-**URL:** https://musicweb.nyxstudios.net  
+**URL:** https://music.ai.nyxstudios.net  
 **Project root:** `/home/legion/legionprojects/musicweb/`
 
 ---
@@ -218,13 +218,13 @@ WantedBy=multi-user.target
 
 Add ingress rule:
 ```yaml
-- hostname: musicweb.nyxstudios.net
+- hostname: music.ai.nyxstudios.net
   service: http://192.168.1.236:8000
 ```
 
 ### Cloudflare Access
 
-New application: `musicweb.nyxstudios.net` — same Google OAuth policy as existing protected services (`steve.j.petry@gmail.com` + any additional allowed emails).
+New application: `music.ai.nyxstudios.net` — same Google OAuth policy as existing protected services (`steve.j.petry@gmail.com` + any additional allowed emails).
 
 ---
 
