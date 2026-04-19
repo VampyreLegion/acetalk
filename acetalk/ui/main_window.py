@@ -161,6 +161,14 @@ class MainWindow(QMainWindow):
         self.stems_tab.state_changed.connect(self.refresh_output)
         self.tabs.addTab(self.stems_tab, "Stems")
 
+        from ..tabs.guide_tab import GuideTab
+        self.guide_tab = GuideTab()
+        self.tabs.addTab(self.guide_tab, "Guide")
+
+        from ..tabs.lint_tab import LintTab
+        self.lint_tab = LintTab(self.state)
+        self.tabs.addTab(self.lint_tab, "Lint")
+
     def _add_toolbar(self):
         tb = QToolBar("Main")
         self.addToolBar(tb)
