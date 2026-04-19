@@ -302,7 +302,11 @@ class MainWindow(QMainWindow):
         except Exception as exc:
             QMessageBox.warning(self, "Tag MP3 Error", str(exc))
 
-    def _on_push_requested(self, caption: str, lyrics: str):
+    def _on_push_requested(self, _caption: str = "", _lyrics: str = ""):
+        # Always rebuild from current state — display boxes may be stale
+        caption, lyrics = build_prompt(self.state)
+        self.output_panel.update_output(caption, lyrics)
+
         song_name = self.output_panel.preset_name.text().strip() or self.state.genre or "Untitled"
 
         # Build workflow first — no network calls yet
