@@ -1,0 +1,145 @@
+{
+    "1": {
+        "inputs": {
+            "audio": "placeholder.mp3"
+        },
+        "class_type": "LoadAudio",
+        "_meta": {
+            "title": "Load Audio (Input)"
+        }
+    },
+    "2": {
+        "inputs": {
+            "vae": [
+                "102",
+                0
+            ],
+            "audio": [
+                "1",
+                0
+            ]
+        },
+        "class_type": "VAEEncodeAudio",
+        "_meta": {
+            "title": "VAE Encode Audio"
+        }
+    },
+    "3": {
+        "inputs": {
+            "tags": "",
+            "lyrics": "",
+            "seed": 31,
+            "bpm": 120,
+            "duration": 60.0,
+            "timesignature": "4",
+            "language": "en",
+            "keyscale": "C major",
+            "generate_audio_codes": true,
+            "cfg_scale": 2,
+            "temperature": 0.85,
+            "top_p": 0.9,
+            "top_k": 0,
+            "min_p": 0,
+            "clip": [
+                "101",
+                0
+            ]
+        },
+        "class_type": "TextEncodeAceStepAudio1.5",
+        "_meta": {
+            "title": "Text Encode (Extract)"
+        }
+    },
+    "4": {
+        "inputs": {
+            "seed": 31,
+            "steps": 8,
+            "cfg": 1,
+            "sampler_name": "euler",
+            "scheduler": "simple",
+            "denoise": 1,
+            "model": [
+                "100",
+                0
+            ],
+            "positive": [
+                "3",
+                0
+            ],
+            "negative": [
+                "3",
+                0
+            ],
+            "latent_image": [
+                "2",
+                0
+            ]
+        },
+        "class_type": "KSampler",
+        "_meta": {
+            "title": "KSampler"
+        }
+    },
+    "5": {
+        "inputs": {
+            "samples": [
+                "4",
+                0
+            ],
+            "vae": [
+                "102",
+                0
+            ]
+        },
+        "class_type": "VAEDecodeAudio",
+        "_meta": {
+            "title": "VAE Decode Audio"
+        }
+    },
+    "6": {
+        "inputs": {
+            "filename_prefix": "audio/Nyx_remix",
+            "quality": "V0",
+            "audioUI": "",
+            "audio": [
+                "5",
+                0
+            ]
+        },
+        "class_type": "SaveAudioMP3",
+        "_meta": {
+            "title": "Save Remix (MP3)"
+        }
+    },
+    "100": {
+        "inputs": {
+            "unet_name": "acestep_v1.5_xl_turbo_bf16.safetensors",
+            "weight_dtype": "default"
+        },
+        "class_type": "UNETLoader",
+        "_meta": {
+            "title": "Load Diffusion Model"
+        }
+    },
+    "101": {
+        "inputs": {
+            "clip_name1": "qwen_0.6b_ace15.safetensors",
+            "clip_name2": "qwen_4b_ace15.safetensors",
+            "type": "ace",
+            "device": "default"
+        },
+        "class_type": "DualCLIPLoader",
+        "_meta": {
+            "title": "DualCLIPLoader"
+        }
+    },
+    "102": {
+        "inputs": {
+            "vae_name": "ace_1.5_vae.safetensors"
+        },
+        "class_type": "VAELoader",
+        "_meta": {
+            "title": "Load VAE"
+        }
+    }
+}

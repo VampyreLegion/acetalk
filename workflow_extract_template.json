@@ -6,7 +6,7 @@
       "end_time": 0.0
     },
     "class_type": "LoadAudio",
-    "_meta": { "title": "Load Audio (Input)" }
+    "_meta": { "title": "Load Source Audio (Full Mix)" }
   },
   "2": {
     "inputs": {
@@ -14,62 +14,70 @@
       "audio": ["1", 0]
     },
     "class_type": "VAEEncodeAudio",
-    "_meta": { "title": "VAE Encode Audio" }
+    "_meta": { "title": "Encode Full Mix (starting latent + timbre)" }
   },
   "3": {
     "inputs": {
       "tags": "",
       "lyrics": "",
-      "seed": 31,
+      "seed": 0,
       "bpm": 120,
       "duration": 60.0,
       "timesignature": "4",
       "language": "en",
       "keyscale": "C major",
-      "generate_audio_codes": true,
-      "cfg_scale": 2,
+      "generate_audio_codes": false,
+      "cfg_scale": 2.0,
       "temperature": 0.85,
       "top_p": 0.9,
       "top_k": 0,
-      "min_p": 0,
+      "min_p": 0.0,
       "clip": ["101", 0]
     },
     "class_type": "TextEncodeAceStepAudio1.5",
-    "_meta": { "title": "Text Encode (Extract)" }
+    "_meta": { "title": "Text Encode (target stem prompt)" }
   },
   "4": {
     "inputs": {
-      "seed": 31,
-      "steps": 8,
-      "cfg": 1,
-      "sampler_name": "euler",
-      "scheduler": "simple",
-      "denoise": 1,
-      "model": ["100", 0],
-      "positive": ["3", 0],
-      "negative": ["3", 0],
-      "latent_image": ["2", 0]
+      "conditioning": ["3", 0],
+      "latent": ["2", 0]
     },
-    "class_type": "KSampler",
-    "_meta": { "title": "KSampler" }
+    "class_type": "ReferenceTimbreAudio",
+    "_meta": { "title": "Reference Timbre (preserves mix acoustics)" }
   },
   "5": {
     "inputs": {
-      "samples": ["4", 0],
-      "vae": ["102", 0]
+      "seed": 0,
+      "steps": 20,
+      "cfg": 2.0,
+      "sampler_name": "er_sde",
+      "scheduler": "linear_quadratic",
+      "denoise": 0.98,
+      "model": ["100", 0],
+      "positive": ["4", 0],
+      "negative": ["3", 1],
+      "latent_image": ["2", 0]
     },
-    "class_type": "VAEDecodeAudio",
-    "_meta": { "title": "VAE Decode Audio" }
+    "class_type": "KSampler",
+    "_meta": { "title": "KSampler (extract stem)" }
   },
   "6": {
     "inputs": {
-      "filename_prefix": "stems/stem",
+      "samples": ["5", 0],
+      "vae": ["102", 0]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": { "title": "Decode Extracted Stem" }
+  },
+  "7": {
+    "inputs": {
+      "filename_prefix": "stems/extract",
       "quality": "V0",
       "audioUI": "",
-      "audio": ["5", 0]
+      "audio": ["6", 0]
     },
     "class_type": "SaveAudioMP3",
-    "_meta": { "title": "Save Stem (MP3)" }
+    "_meta": { "title": "Save Extracted Stem (MP3)" }
   },
   "100": {
     "inputs": {

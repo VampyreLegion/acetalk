@@ -1,0 +1,238 @@
+{
+  "1": {
+    "inputs": {
+      "filename": "placeholder.mp3",
+      "start_time": 0.0,
+      "end_time": 0.0
+    },
+    "class_type": "LoadAudio",
+    "_meta": { "title": "Load Source Audio (Full Track)" }
+  },
+  "2": {
+    "inputs": {
+      "vae": ["102", 0],
+      "audio": ["1", 0]
+    },
+    "class_type": "VAEEncodeAudio",
+    "_meta": { "title": "Encode Full Track (timbre reference)" }
+  },
+  "3": {
+    "inputs": {
+      "tags": "",
+      "lyrics": "",
+      "seed": 0,
+      "bpm": 120,
+      "duration": 30.0,
+      "timesignature": "4",
+      "language": "en",
+      "keyscale": "C major",
+      "generate_audio_codes": false,
+      "cfg_scale": 2.0,
+      "temperature": 0.85,
+      "top_p": 0.9,
+      "top_k": 0,
+      "min_p": 0.0,
+      "clip": ["101", 0]
+    },
+    "class_type": "TextEncodeAceStepAudio1.5",
+    "_meta": { "title": "Text Encode (shared for all regions)" }
+  },
+  "4": {
+    "inputs": {
+      "conditioning": ["3", 0],
+      "latent": ["2", 0]
+    },
+    "class_type": "ReferenceTimbreAudio",
+    "_meta": { "title": "Reference Timbre (full track acoustics)" }
+  },
+
+  "10": {
+    "inputs": {
+      "audio": ["1", 0],
+      "start_index": 0.0,
+      "duration": 10.0
+    },
+    "class_type": "TrimAudioDuration",
+    "_meta": { "title": "Trim Region 1" }
+  },
+  "11": {
+    "inputs": {
+      "vae": ["102", 0],
+      "audio": ["10", 0]
+    },
+    "class_type": "VAEEncodeAudio",
+    "_meta": { "title": "Encode Region 1" }
+  },
+  "12": {
+    "inputs": {
+      "seed": 0,
+      "steps": 20,
+      "cfg": 2.0,
+      "sampler_name": "er_sde",
+      "scheduler": "linear_quadratic",
+      "denoise": 0.7,
+      "model": ["100", 0],
+      "positive": ["4", 0],
+      "negative": ["3", 1],
+      "latent_image": ["11", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": { "title": "KSampler Region 1" }
+  },
+  "13": {
+    "inputs": {
+      "samples": ["12", 0],
+      "vae": ["102", 0]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": { "title": "Decode Region 1" }
+  },
+  "14": {
+    "inputs": {
+      "base": ["1", 0],
+      "overlay": ["13", 0],
+      "start_time": 0.0
+    },
+    "class_type": "NyxAudioOverlay",
+    "_meta": { "title": "Paste Region 1 → Full Track" }
+  },
+
+  "20": {
+    "inputs": {
+      "audio": ["1", 0],
+      "start_index": 20.0,
+      "duration": 10.0
+    },
+    "class_type": "TrimAudioDuration",
+    "_meta": { "title": "Trim Region 2" }
+  },
+  "21": {
+    "inputs": {
+      "vae": ["102", 0],
+      "audio": ["20", 0]
+    },
+    "class_type": "VAEEncodeAudio",
+    "_meta": { "title": "Encode Region 2" }
+  },
+  "22": {
+    "inputs": {
+      "seed": 0,
+      "steps": 20,
+      "cfg": 2.0,
+      "sampler_name": "er_sde",
+      "scheduler": "linear_quadratic",
+      "denoise": 0.7,
+      "model": ["100", 0],
+      "positive": ["4", 0],
+      "negative": ["3", 1],
+      "latent_image": ["21", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": { "title": "KSampler Region 2" }
+  },
+  "23": {
+    "inputs": {
+      "samples": ["22", 0],
+      "vae": ["102", 0]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": { "title": "Decode Region 2" }
+  },
+  "24": {
+    "inputs": {
+      "base": ["14", 0],
+      "overlay": ["23", 0],
+      "start_time": 20.0
+    },
+    "class_type": "NyxAudioOverlay",
+    "_meta": { "title": "Paste Region 2 → Output" }
+  },
+
+  "30": {
+    "inputs": {
+      "audio": ["1", 0],
+      "start_index": 45.0,
+      "duration": 10.0
+    },
+    "class_type": "TrimAudioDuration",
+    "_meta": { "title": "Trim Region 3" }
+  },
+  "31": {
+    "inputs": {
+      "vae": ["102", 0],
+      "audio": ["30", 0]
+    },
+    "class_type": "VAEEncodeAudio",
+    "_meta": { "title": "Encode Region 3" }
+  },
+  "32": {
+    "inputs": {
+      "seed": 0,
+      "steps": 20,
+      "cfg": 2.0,
+      "sampler_name": "er_sde",
+      "scheduler": "linear_quadratic",
+      "denoise": 0.7,
+      "model": ["100", 0],
+      "positive": ["4", 0],
+      "negative": ["3", 1],
+      "latent_image": ["31", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": { "title": "KSampler Region 3" }
+  },
+  "33": {
+    "inputs": {
+      "samples": ["32", 0],
+      "vae": ["102", 0]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": { "title": "Decode Region 3" }
+  },
+  "34": {
+    "inputs": {
+      "base": ["24", 0],
+      "overlay": ["33", 0],
+      "start_time": 45.0
+    },
+    "class_type": "NyxAudioOverlay",
+    "_meta": { "title": "Paste Region 3 → Final Output" }
+  },
+
+  "50": {
+    "inputs": {
+      "filename_prefix": "repaint/multi",
+      "quality": "V0",
+      "audioUI": "",
+      "audio": ["34", 0]
+    },
+    "class_type": "SaveAudioMP3",
+    "_meta": { "title": "Save Multi-Repaint (MP3)" }
+  },
+
+  "100": {
+    "inputs": {
+      "unet_name": "acestep_v1.5_xl_turbo_bf16.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": { "title": "Load Diffusion Model" }
+  },
+  "101": {
+    "inputs": {
+      "clip_name1": "qwen_0.6b_ace15.safetensors",
+      "clip_name2": "qwen_4b_ace15.safetensors",
+      "type": "ace",
+      "device": "default"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": { "title": "DualCLIPLoader" }
+  },
+  "102": {
+    "inputs": {
+      "vae_name": "ace_1.5_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": { "title": "Load VAE" }
+  }
+}
