@@ -86,7 +86,7 @@
   },
   "8": {
     "inputs": {
-      "filename_prefix": "radio/seg",
+      "filename_prefix": "audio/Nyx_radio",
       "quality": "V0",
       "audioUI": "",
       "audio": ["7", 0]
