@@ -53,6 +53,13 @@
     "class_type": "EmptyAceStep1.5LatentAudio",
     "_meta": { "title": "Empty Latent (fresh generation target)" }
   },
+  "9": {
+    "inputs": {
+      "conditioning": ["3", 0]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": { "title": "Negative Conditioning" }
+  },
   "6": {
     "inputs": {
       "seed": 0,
@@ -63,7 +70,7 @@
       "denoise": 1.0,
       "model": ["100", 0],
       "positive": ["4", 0],
-      "negative": ["3", 1],
+      "negative": ["9", 0],
       "latent_image": ["5", 0]
     },
     "class_type": "KSampler",

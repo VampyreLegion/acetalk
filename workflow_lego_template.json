@@ -24,6 +24,11 @@
     "class_type": "ReferenceTimbreAudio",
     "_meta": { "title": "Reference Timbre (full source)" }
   },
+  "9": {
+    "inputs": { "conditioning": ["3", 0] },
+    "class_type": "ConditioningZeroOut",
+    "_meta": { "title": "Negative Conditioning" }
+  },
   "5": {
     "inputs": {
       "seed": 42, "steps": 20, "cfg": 2,
@@ -31,7 +36,7 @@
       "denoise": 0.5,
       "model": ["100", 0],
       "positive": ["4", 0],
-      "negative": ["3", 1],
+      "negative": ["9", 0],
       "latent_image": ["2", 0]
     },
     "class_type": "KSampler",

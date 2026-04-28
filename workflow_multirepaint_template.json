@@ -1,7 +1,7 @@
 {
   "1": {
     "inputs": {
-      "filename": "placeholder.mp3",
+      "audio": "placeholder.mp3",
       "start_time": 0.0,
       "end_time": 0.0
     },
@@ -45,6 +45,13 @@
     "class_type": "ReferenceTimbreAudio",
     "_meta": { "title": "Reference Timbre (full track acoustics)" }
   },
+  "9": {
+    "inputs": {
+      "conditioning": ["3", 0]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": { "title": "Negative Conditioning" }
+  },
 
   "10": {
     "inputs": {
@@ -73,7 +80,7 @@
       "denoise": 0.7,
       "model": ["100", 0],
       "positive": ["4", 0],
-      "negative": ["3", 1],
+      "negative": ["9", 0],
       "latent_image": ["11", 0]
     },
     "class_type": "KSampler",
@@ -124,7 +131,7 @@
       "denoise": 0.7,
       "model": ["100", 0],
       "positive": ["4", 0],
-      "negative": ["3", 1],
+      "negative": ["9", 0],
       "latent_image": ["21", 0]
     },
     "class_type": "KSampler",
@@ -175,7 +182,7 @@
       "denoise": 0.7,
       "model": ["100", 0],
       "positive": ["4", 0],
-      "negative": ["3", 1],
+      "negative": ["9", 0],
       "latent_image": ["31", 0]
     },
     "class_type": "KSampler",
