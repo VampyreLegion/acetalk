@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legion's Ultimate User Guide — Nyx-Step MusicWeb v3.7</title>
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --surface: #12141c;
+      --surface2: #1a1c26;
+      --text: #e2e4ed;
+      --text-muted: #8a8f9e;
+      --accent: #7c65d9;
+      --accent2: #00d4b6;
+      --accent3: #ff6b6b;
+      --code-bg: #151720;
+      --border: #2d3041;
+      --success: #00b894;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      padding: 2rem;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    h1, h2, h3 { color: #fff; margin: 2rem 0 0.8rem; }
+    h1 { text-align: center; font-size: 2.4rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.6rem; }
+    h2 { border-left: 4px solid var(--accent); padding-left: 1rem; }
+    p, li { margin-bottom: 0.9rem; color: var(--text); }
+    ul, ol { padding-left: 1.5rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; background: var(--surface2); border-radius: 8px; overflow: hidden; }
+    th, td { padding: 0.85rem; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: var(--surface); color: var(--accent2); font-weight: 600; }
+    code { background: var(--code-bg); padding: 0.25rem 0.45rem; border-radius: 4px; font-family: 'SF Mono', Consolas, monospace; color: #a6e3a1; font-size: 0.9em; }
+    pre { background: var(--code-bg); padding: 1.2rem; border-radius: 10px; overflow-x: auto; margin: 1rem 0; border: 1px solid var(--border); }
+    pre code { background: none; padding: 0; color: #cdd6f4; }
+    .highlight { color: var(--accent2); font-weight: 600; }
+    .warning { color: var(--accent3); font-weight: 600; }
+    .checklist { list-style: none; padding-left: 0; }
+    .checklist li { margin-bottom: 0.5rem; }
+    .checklist li::before { content: "☐ "; color: var(--accent); font-weight: bold; }
+    .copy-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { background: #6551c2; transform: translateY(-1px); }
+    .copy-btn.copied { background: var(--success); }
+    .toc { background: var(--surface2); padding: 1.2rem; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 2rem; }
+    .toc ul { list-style: none; padding: 0; }
+    .toc li { margin-bottom: 0.4rem; }
+    .toc a { color: var(--accent2); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    footer { text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem; }
+    @media (max-width: 600px) { body { padding: 1rem; } h1 { font-size: 1.7rem; } pre { font-size: 0.85rem; } }
+  </style>
+</head>
+<body>
+
+  <h1>📘 Nyx-Step MusicWeb — Complete User Guide (v3.7)</h1>
+  <p style="text-align:center; color:var(--text-muted); margin-bottom:2rem;">Architecture-Driven Prompting, Structural Control & Workflow Mastery</p>
+
+  <div class="toc">
+    <strong>📑 Table of Contents</strong>
+    <ul>
+      <li><a href="#summary">Executive Summary</a></li>
+      <li><a href="#ch1">1. The Dual-Prompting Philosophy</a></li>
+      <li><a href="#ch2">2. Mastering the Tags Field</a></li>
+      <li><a href="#ch3">3. Lyric Brackets & Timeline Control</a></li>
+      <li><a href="#ch4">4. Mimicking DAW Modules & Advanced Techniques</a></li>
+      <li><a href="#ch5">5. Advanced "Hidden" Syntax</a></li>
+      <li><a href="#ch6">6. Operational Commands & Workflow</a></li>
+      <li><a href="#ch7">7. Real-World Examples</a></li>
+      <li><a href="#ch8">8. Troubleshooting & Pro Checklist</a></li>
+      <li><a href="#appendix">Appendix & Interactive Prompt Builder</a></li>
+    </ul>
+  </div>
+
+  <h2 id="summary">🧠 Executive Summary</h2>
+  <p>AI music generator built on a <span class="highlight">Large Language Model + Diffusion Transformer (LLM+DiT)</span> architecture. Unlike traditional DAWs, it <strong>does not use hard-coded parameters, MIDI routing, or virtual knobs</strong>. Instead, it interprets your input as <strong>semantic tokens</strong>.</p>
+  <p>Control is achieved through a <span class="highlight">Dual-Prompting System</span>:</p>
+  <ul>
+    <li><strong>Tags Field:</strong> Defines the global sonic palette, production era, and performance techniques.</li>
+    <li><strong>Lyrics Field:</strong> Controls timeline structure, instrument triggers, and dynamic shifts using bracketed syntax.</li>
+  </ul>
+
+  <h2 id="ch1">📐 Chapter 1: The Dual-Prompting Philosophy</h2>
+  <p>DiT diffusion process treats your prompt as a <span class="highlight">spatial-temporal map</span>. The model cross-references global descriptors (Tags) with time-anchored cues (Lyrics Brackets) to generate coherent arrangements.</p>
+  <table>
+    <tr><th>Component</th><th>Purpose</th><th>Best Practice</th></tr>
+    <tr><td><code>Tags</code></td><td>Sets instrumental foundation, mood, era, production style</td><td>Comma-separated, 5–12 tokens max. Order matters: place primary instruments first.</td></tr>
+    <tr><td><code>Lyrics/Structure</code></td><td>Maps sections, triggers solos/drops, controls vocal behavior</td><td>Use <code>[Bracketed]</code> cues on separate lines. Keep descriptors concise. <span class="warning">Never nest brackets.</span></td></tr>
+  </table>
+  <p><span class="warning">⚠️ Critical Rule:</span> Never mix structural brackets into the Tags field.<br>
+  <strong>Tags =</strong> <em>What it sounds like</em> (Global)<br>
+  <strong>Lyrics =</strong> <em>When it happens</em> (Temporal)</p>
+
+  <h2 id="ch2">🎛️ Chapter 2: Mastering the Tags Field (Global Control)</h2>
+  <p>The Tags field acts as the "preset engine." responds best to short, comma-separated semantic descriptors.</p>
+  <table>
+    <tr><th>Category</th><th>Proven Keywords</th></tr>
+    <tr><td>Instrumentation</td><td><code>slap bass, fingerpicked acoustic guitar, juno synth, 808 drums, grand piano, distorted lead, brushed percussion</code></td></tr>
+    <tr><td>Performance Technique</td><td><code>staccato strings, legato violin, rhythmic strumming, arpeggiated synth, muted electric guitar, fingerpicked</code></td></tr>
+    <tr><td>Mood/Emotion</td><td><code>ethereal, dark, uplifting, melancholic, aggressive, cinematic, nostalgic, dreamy</code></td></tr>
+    <tr><td>Production/Modules</td><td><code>filtered, lo-fi, gated reverb, resonance, sweeping pads, sidechained, dry mix, wet, tape saturation</code></td></tr>
+    <tr><td>Tempo & Groove</td><td><code>120 bpm, up-tempo, halftime, syncopated, swing, shuffle, driving rhythm</code></td></tr>
+    <tr><td>Era/Style</td><td><code>80s style, vintage 70s, modern pop, 90s grunge, 2020s trap</code></td></tr>
+  </table>
+  <h3>💡 Token Weighting & Solo Triggers</h3>
+  <ul>
+    <li><strong>First 3 tokens</strong> carry the highest diffusion weight. Place your lead instrument and core mood first.</li>
+    <li>Add <code>virtuosic</code> or <code>shredding</code> to Tags if the model under-renders solos. These are high-weight tokens in the training set.</li>
+    <li>Avoid redundant terms (e.g., <code>guitar, acoustic guitar, guitar riff</code> → collapses into noise).</li>
+  </ul>
+
+  <h2 id="ch3">🗺️ Chapter 3: Lyric Brackets & Structural Control</h2>
+  <p>Place structural and performance cues in the <strong>Lyrics field</strong>. Each bracket acts as a time-anchored trigger.</p>
+  <h3>🏗️ Structural Brackets</h3>
+  <table>
+    <tr><th>Tag</th><th>Effect</th></tr>
+    <tr><td><code>[Intro]</code></td><td>Low/medium energy. Establishes key, tempo, and primary loop.</td></tr>
+    <tr><td><code>[Verse]</code></td><td>Narrative focus. Lead vocal/melody forward, lighter backing.</td></tr>
+    <tr><td><code>[Pre-Chorus]</code></td><td>Rising tension. Risers, drum fills, harmonic shifts.</td></tr>
+    <tr><td><code>[Chorus]</code></td><td>Peak energy. Full arrangement, loudest delivery.</td></tr>
+    <tr><td><code>[Bridge]</code></td><td>Harmonic variation. Changes progression or slows pace.</td></tr>
+    <tr><td><code>[Outro]</code></td><td>Fading energy. Strips instruments for a clean finish.</td></tr>
+    <tr><td><code>[Interlude]</code></td><td>Instrumental connector. No vocals.</td></tr>
+  </table>
+  <h3>🎸 Dynamic & Instrumental Triggers</h3>
+  <table>
+    <tr><th>Tag</th><th>Effect</th></tr>
+    <tr><td><code>[Instrumental]</code> / <code>[Inst]</code></td><td>Strips all vocals.</td></tr>
+    <tr><td><code>[Guitar Solo]</code> / <code>[Synth Solo]</code></td><td>Directs the model to prioritize a specific instrument solo. (While <code>[Solo: Instrument]</code> is recognized, <code>[Guitar Solo]</code> yields more consistent results.)</td></tr>
+    <tr><td><code>[Arpeggio]</code></td><td>Forces the synth or guitar into a repeating broken-chord pattern.</td></tr>
+    <tr><td><code>[Breakdown]</code></td><td>Strips drums and heavy bass. Leaves a "clean" instrument section.</td></tr>
+    <tr><td><code>[Drop]</code></td><td>Triggers high-intensity impact + heavy bass. Best for EDM/Metal.</td></tr>
+    <tr><td><code>[Build-up]</code></td><td>Gradual volume/density increase. Rushing drums.</td></tr>
+    <tr><td><code>[Strumming]</code></td><td>Switches string instruments to rhythmic chords.</td></tr>
+    <tr><td><code>[Riff]</code></td><td>Repetitive, catchy instrumental hook.</td></tr>
+    <tr><td><code>[Fill]</code></td><td>Short drum/synth flourish at phrase ends.</td></tr>
+  </table>
+  <h3>🎵 LRC Synchronized Lyrics</h3>
+  <p>When your Lyrics field contains actual sung lyrics (not just structural brackets), a <strong>🎵 LRC</strong> button appears on the job card after generation. Clicking it generates a time-synchronized <code>.lrc</code> file — the standard format used by music players (Poweramp, foobar2000, VLC) to display lyrics scrolling in sync with the audio. Timing is estimated from RMS silence-boundary detection in the audio; BPM is used as a fallback for subdivision. See the <strong>🎵 LRC</strong> guide section for full details.</p>
+
+  <h2 id="ch4">🔍 Chapter 4: Mimicking DAW "Modules" & Advanced Techniques</h2>
+  <p>Doesn't use literal <code>[Module: Filter]</code> commands. Emulate hardware/DAW behavior using <strong>semantic production descriptors</strong>.</p>
+  <table>
+    <tr><th>DAW Concept</th><th>Equivalent</th></tr>
+    <tr><td>Filter Sweep</td><td><code>sweeping resonance, evolving texture, filtered pads</code> (Place in Tags + combine with <code>[Build-up]</code> or <code>[Interlude]</code> in Lyrics)</td></tr>
+    <tr><td>Sidechain Compression</td><td><code>sidechained, pumping bass, rhythmic ducking</code></td></tr>
+    <tr><td>Strumming vs Picking</td><td><code>rhythmic strumming</code> (chords) vs <code>arpeggiated, plucked, fingerpicked</code></td></tr>
+    <tr><td>Vintage Synth (Juno/Moog)</td><td><code>warm analog pads, vintage synth, chorus effect, detuned oscillators</code></td></tr>
+    <tr><td>Gated Reverb</td><td><code>gated reverb, 80s drums, tight room</code></td></tr>
+  </table>
+  <h3>🔄 The "Repaint" Workflow</h3>
+  <ol>
+    <li>Highlight the time range (e.g., <code>0:15–0:30</code>).</li>
+    <li>Adjust the <strong>Tags</strong> for that segment (e.g., change <code>strummed guitar</code> → <code>finger-picked guitar</code>).</li>
+    <li>Click <strong>Repaint</strong>. The DiT model regenerates only that window while preserving surrounding diffusion coherence.</li>
+  </ol>
+
+  <h2 id="ch5">🎤 Chapter 5: Advanced "Hidden" Syntax & Symbols</h2>
+  <table>
+    <tr><th>Syntax</th><th>Effect</th></tr>
+    <tr><td><code>(word)</code></td><td>Background vocals, harmonies, or echoes.</td></tr>
+    <tr><td><code>UPPERCASE</code></td><td>Emphasized/shouted delivery.</td></tr>
+    <tr><td><code>[Section - Adjective]</code></td><td>Combines structure + style: <code>[Chorus - Anthemic]</code>, <code>[Verse - Whispered]</code></td></tr>
+    <tr><td><code>[Vocal: Type]</code></td><td>Forces vocal texture: <code>[Vocal: Rasp]</code>, <code>[Vocal: Falsetto]</code>, <code>[Vocal: Breathless]</code></td></tr>
+    <tr><td><code>[zh]</code> / <code>[ko]</code> / <code>[es]</code></td><td>Language codes for phonetic enforcement in multilingual tracks.</td></tr>
+  </table>
+  <p><span class="warning">⚠️ Syntax Rules:</span> Keep brackets on separate lines. Never nest brackets (<code>[Verse [Chorus]]</code> breaks diffusion parsing). Avoid mixing structural cues into Tags.</p>
+
+  <h2 id="ch6">🛠️ Chapter 6: Operational Modes & Workflow Strategy</h2>
+  <p>Nyx-Step MusicWeb has eleven operational modes beyond the core Generate button. Each targets a different creative or technical goal.</p>
+
+  <h3>Per-Job Actions (on every job card)</h3>
+  <table>
+    <tr><th>Action</th><th>What It Does</th><th>When To Use</th></tr>
+    <tr><td><strong>🔀 Variation</strong></td><td>New seed, same prompt — a fresh take on the same direction. Batch up to 4 at once.</td><td>When the structure is right but you want a different "performance"</td></tr>
+    <tr><td><strong>↩ Retake</strong></td><td>Full re-generation with a new random seed; identical parameters.</td><td>Quick lottery — when the generation is mostly wrong and you want to try again cheap</td></tr>
+    <tr><td><strong>🖌 Repaint</strong></td><td>Regenerates only a selected time window. Set start/end, optionally change tags for that region.</td><td>Fix a specific section — bad chorus, dull bridge, missed drop</td></tr>
+    <tr><td><strong>⬆ Extend</strong></td><td>Adds time to the end of the track (30 s increments). Inherits timbre from existing audio.</td><td>Grow a 30 s idea into a full song; add an outro</td></tr>
+    <tr><td><strong>📊 Score</strong></td><td>Runs acoustic quality analysis: Loudness, Dynamics, Spectral, Saturation, Coherence. Returns 0–10 score + grade.</td><td>Sanity-check before downloading; catch clipping or spectral imbalance</td></tr>
+    <tr><td><strong>🎵 LRC</strong></td><td>Generates a time-synchronized <code>.lrc</code> lyrics file (shown only if lyrics were provided).</td><td>When you want lyrics to scroll in your music player</td></tr>
+  </table>
+
+  <h3>Cover Tab — Reference Audio Modes</h3>
+  <p>Upload any audio file to the Cover tab to use it as a reference. Four inner modes are available:</p>
+  <table>
+    <tr><th>Mode</th><th>What It Does</th><th>Best Model</th><th>Tips</th></tr>
+    <tr><td><strong>Cover</strong></td><td>Preserves the reference melody/timbre; rewrites the style based on your tags. Produces a "cover" of the uploaded track in a new genre or style.</td><td>XL SFT (30–50 steps, CFG 7)</td><td>Use Analyze tab first to detect BPM/Key from the reference, then Apply to set tags. Works best with clean, dry audio.</td></tr>
+    <tr><td><strong>Lego Mode</strong></td><td>Layer-by-layer composition. Upload an existing stem/layer; generate a new layer that complements it. Repeat to build a full arrangement track by track.</td><td>XL Base (30–50 steps)</td><td>Start with drums → bass → harmony → lead → vocals. Each layer uses the previous as a timbre reference. Tags should describe only the new layer being added.</td></tr>
+    <tr><td><strong>Complete Mode</strong></td><td>Fills in gaps or extends a partial arrangement. Upload an incomplete track; Nyx-Step generates what's missing while preserving the existing structure.</td><td>XL Base (30–50 steps)</td><td>Works well on tracks with obvious structural holes (silent sections, abrupt endings). Tags describe the intended complete arrangement.</td></tr>
+    <tr><td><strong>Extract Mode</strong></td><td>Diffusion-guided source separation. Upload a mixed track; use tags to steer what gets isolated (<code>isolated vocals, a cappella</code> or <code>solo guitar, no drums</code>). Not deterministic — creative re-rendering of the reference toward your tags.</td><td>XL Base (0.98 denoise, CFG 7)</td><td>Use Demucs first for standard vocal/drum/bass separation. Use Extract when Demucs doesn't give you what you need, or when targeting a texture rather than a fixed stem.</td></tr>
+  </table>
+
+  <h3>Multi-Mask Repaint</h3>
+  <p>Available via the <strong>Extract</strong> button when multiple job cards are selected, or directly in the Cover tab's repaint workflow. Lets you repaint up to 3 non-overlapping time regions in a single generation pass — each region can have different tags. Uses the <code>NyxAudioOverlay</code> ComfyUI node to stitch results back into the original audio.</p>
+
+  <h3>Stems Tab — Demucs Separation</h3>
+  <p>Uses Facebook's <strong>Demucs v4</strong> to separate audio into 4 stems (vocals, drums, bass, other) or 6 stems (adds guitar and piano). Deterministic — same input always produces the same output. Best for standard stem separation; faster and more predictable than Extract Mode.</p>
+  <table>
+    <tr><th>Model</th><th>Stems</th><th>Best For</th></tr>
+    <tr><td>htdemucs</td><td>4 (vocals, drums, bass, other)</td><td>General-purpose; fast; best starting point</td></tr>
+    <tr><td>htdemucs_6s</td><td>6 (adds guitar, piano)</td><td>When guitar or piano isolation is needed</td></tr>
+    <tr><td>mdx_extra</td><td>4</td><td>Alternative quality profile; sometimes cleaner on certain genres</td></tr>
+  </table>
+
+  <h3>📻 Radio Mode</h3>
+  <p>Generates an endless, coherent audio stream. Each segment (~30 s recommended) inherits timbre from the previous via <code>ReferenceTimbreAudio</code> — the stream stays sonically consistent while evolving through random seeds. New segments queue in the browser and play back-to-back automatically.</p>
+  <ul>
+    <li>Set <strong>XL Turbo, 8 steps</strong> for near-real-time streaming (segment generation ≈ segment duration)</li>
+    <li>History panel shows all completed segments with download links; 🗑 Clear removes the display without stopping the stream</li>
+    <li>Refreshing the page reconnects to the running stream automatically</li>
+  </ul>
+
+  <h3>Recommended Iterative Workflow</h3>
+  <ol>
+    <li><strong>Analyze</strong> a reference track → Apply BPM/Key/Chords</li>
+    <li><strong>Generate</strong> at 30 s, XL Turbo (fast preview)</li>
+    <li><strong>Retake</strong> if it's fundamentally wrong; <strong>Repaint</strong> specific sections if most is right</li>
+    <li><strong>Extend</strong> to build to full length</li>
+    <li><strong>Variation</strong> batch (×4) to audition different performances at full length</li>
+    <li><strong>Cover</strong> tab with SFT model for a high-quality render of the best variation</li>
+    <li><strong>Demucs</strong> to separate stems; use stems in your DAW</li>
+    <li><strong>LRC</strong> if you added lyrics — download .lrc alongside the audio</li>
+  </ol>
+
+  <h2 id="ch7">📖 Chapter 7: Real-World Examples</h2>
+  <h3>Example 1: Cinematic Folk Ballad</h3>
+  <pre><code>TAGS: fingerpicked acoustic guitar, cello, warm analog pads, vintage 70s, melancholic, 90 bpm, tape saturation, intimate vocal
+
+LYRICS:
+[Intro]
+(fingerpicking pattern, soft swell)
+
+[Verse - Whispered]
+I walked the hollow roads alone
+(shadows stretch, cello sighs)
+
+[Pre-Chorus]
+The wind began to call my name
+(sweeping resonance, evolving pads)
+
+[Chorus - Anthemic]
+I WILL NOT TURN BACK NOW!
+(full strings, driving rhythm, open chords)
+
+[Bridge]
+(cello solo, stripped percussion)
+
+[Outro]
+(fading fingerpicking, tape hiss)</code></pre>
+
+  <h3>Example 2: 80s Synthwave Drop</h3>
+  <pre><code>TAGS: juno synth, analog lead, gated reverb, 80s style, driving rhythm, sidechained, 118 bpm, aggressive
+
+LYRICS:
+[Intro]
+(warm analog pads, chorus effect)
+
+[Verse]
+Neon lights on midnight glass
+(sequenced arpeggios)
+
+[Pre-Chorus]
+Heartbeat syncs to the machine
+(build-up, rushing drums, filter sweep)
+
+[Drop]
+(FULL ARRANGEMENT, heavy bass impact)
+
+[Interlude]
+(arpeggiated synth, rhythmic strumming)
+
+[Outro]
+(fading pads, tape stop)</code></pre>
+
+  <h3>Example 3: Nyx Radio — Ambient Background Stream</h3>
+  <p>Goal: unattended generative ambient music for a work session. Set these in the Radio tab:</p>
+  <pre><code>TAGS (Radio tab): ambient drone, evolving texture, warm pads, slow attack, reverb, 70 bpm, C Major, minimal, no percussion
+BPM: 70  |  Key: C  |  Scale: Major  |  Duration: 45s  |  Steps: 8
+Model: XL Turbo  |  Sampler: er_sde  |  Scheduler: linear_quadratic</code></pre>
+  <p>Click <strong>📻 Start Radio</strong>. Segment 0 generates in ~45 s; playback begins automatically. Each subsequent segment inherits the ambient timbre and evolves slowly. The history panel fills with downloadable segments — 🗑 Clear periodically to keep the list manageable.</p>
+
+  <h3>Example 4: Analyze → Cover → Demucs Workflow</h3>
+  <p>Goal: take a reference track, make a lo-fi hip-hop cover, then extract the vocals as a separate stem.</p>
+  <ol>
+    <li><strong>Analyze tab</strong> — upload reference track → note BPM 92, Key A, Scale Minor, LUFS –11 → click ✓ Apply</li>
+    <li><strong>Style Infusor</strong> — select "Lo-Fi Hip Hop" genre chip → adds <code>lo-fi hip hop, vinyl warmth, mellow, tape saturation, 92 bpm</code></li>
+    <li><strong>Generate</strong> — 30 s at XL Turbo for a fast preview; listen and confirm direction</li>
+    <li><strong>Cover tab</strong> — upload reference track; mode = Cover; generate at XL SFT 50 steps, CFG 7 for quality render</li>
+    <li><strong>Stems tab</strong> — upload the Cover output; model = htdemucs; click Separate → downloads vocals.mp3, drums.mp3, bass.mp3, other.mp3</li>
+    <li>Load stems into DAW; the isolated vocal can be pitch-corrected, time-shifted, or layered with other generations</li>
+  </ol>
+
+  <h3>Example 5: Lego Mode — Build a Track Layer by Layer</h3>
+  <p>Goal: create a jazz trio (drums → bass → piano) with each instrument as a separate generation.</p>
+  <pre><code>Step 1 — Generate drums:
+  TAGS: jazz drums, brushed snare, ride cymbal, loose, 120 bpm, D Dorian
+  LYRICS: [Intro] [Verse] [Chorus] [Outro]
+  → Generates drum track; download as drums_D_Dorian.mp3
+
+Step 2 — Lego Mode (Cover tab → Lego):
+  Upload: drums_D_Dorian.mp3
+  TAGS: upright bass, walking bass line, jazz, 120 bpm, D Dorian, no drums
+  → Generates bass track that complements the drums
+
+Step 3 — Lego Mode again:
+  Upload: bass layer output
+  TAGS: grand piano, jazz comping, block chords, 120 bpm, D Dorian, no drums, no bass
+  → Adds piano comping over the existing rhythm section</code></pre>
+
+  <h2 id="ch8">🛑 Chapter 8: Troubleshooting & Pro Checklist</h2>
+  <table>
+    <tr><th>Issue</th><th>Solution</th></tr>
+    <tr><td>Solo ignores instrument</td><td>Add <code>virtuosic</code> or <code>shredding</code> to Tags. Ensure instrument is in first 3 tags. Use <code>[Guitar Solo]</code> in Lyrics.</td></tr>
+    <tr><td>Vocals drown out instruments</td><td>Add <code>dry mix, forward vocal, spacious arrangement</code> to Tags.</td></tr>
+    <tr><td>Drop feels weak</td><td>Place <code>[Drop]</code> on its own line. Add <code>heavy bass impact, full arrangement</code> to Tags.</td></tr>
+    <tr><td>Filter sweep doesn't trigger</td><td>Use <code>[Interlude - sweeping resonance, evolving texture]</code> in Lyrics + <code>filtered, sidechained</code> in Tags.</td></tr>
+    <tr><td>Model ignores structure</td><td>Keep brackets on separate lines. Avoid nesting.</td></tr>
+    <tr><td>Cover mode doesn't match reference style</td><td>Run Analyze tab first → Apply to set BPM/Key/Chords from the reference. Use XL SFT model at 30–50 steps, CFG 7. Turbo model at high CFG can over-generate away from the reference.</td></tr>
+    <tr><td>Extract mode output sounds like a full mix, not isolated</td><td>Lower denoise to 0.7–0.85 for more reference preservation. Use very specific tags: <code>isolated vocals, a cappella, no instruments, no drums</code> — vague tags produce vague results. Use XL Base model.</td></tr>
+    <tr><td>Radio stream stops or never starts playback</td><td>Check the Segment History panel — if segments appear there, audio is generating. If the player doesn't auto-play, click ▶ on a history entry manually. Ensure browser hasn't blocked autoplay (check browser console for <code>NotAllowedError</code>). If history is empty, check the MusicWeb service logs: <code>journalctl -u musicweb -n 50</code></td></tr>
+    <tr><td>Radio segments don't sound coherent (too random)</td><td>The timbre chain requires the previous segment file to exist in ComfyUI's output directory. If files are being deleted or moved, coherence breaks. Ensure disk is not full (<code>df -h</code>). Reduce Duration to 30 s to keep the chain shorter.</td></tr>
+    <tr><td>LRC button not showing on job card</td><td>The 🎵 LRC button only appears when lyrics were provided at generation time. Check history — if the job's caption includes lyrics text, the button should appear. If missing, regenerate the track with lyrics in the field.</td></tr>
+    <tr><td>LRC timing is badly off</td><td>Timing is estimated from audio silence-boundary detection. Works best when lyrics have distinct phrase-break silences (&ge;0.8 s). For continuous vocal tracks, set the correct BPM in the Parameters tab before generating LRC. For frame-accurate sync, import the .lrc into your DAW and adjust manually.</td></tr>
+    <tr><td>Quality score is low on Spectral dimension</td><td>Bass-heavy: add <code>bright, crisp, airy</code> tags or reduce bass instrument density. Treble-heavy: add <code>warm, full, deep bass</code>. Also check if the output is clipping (Saturation score low) — regenerate or reduce output level.</td></tr>
+    <tr><td>Demucs separation has bleed (instruments leaking into wrong stem)</td><td>This is normal for htdemucs on complex material. Try <code>mdx_extra</code> model as an alternative. For cleaner vocal isolation, the 6-stem model adds guitar/piano which reduces "other" stem bleed.</td></tr>
+    <tr><td>ComfyUI workflow error in logs</td><td>Most workflow errors are <code>IndexError: list index out of range</code> on the negative conditioning input — this means the workflow template has an invalid node reference. All templates should use a <code>ConditioningZeroOut</code> node for negative conditioning. Check <code>workflow_*_template.json</code> files in AceUser/.</td></tr>
+  </table>
+  <ul class="checklist">
+    <li>Tags are comma-separated, 5–12 tokens, lead instrument first</li>
+    <li>Brackets are in Lyrics field only, one per line, no nesting</li>
+    <li>Production descriptors match desired DAW/module behavior</li>
+    <li>Repaint/Extend strategy planned for iterative refinement</li>
+    <li>Seed saved for reproducibility if output is strong</li>
+    <li>For Cover/Extract: Analyze reference track first and Apply results</li>
+    <li>For Radio: use XL Turbo, Duration ≤ 45 s, er_sde + linear_quadratic</li>
+    <li>For Lego: tags describe only the NEW layer being added, not the full arrangement</li>
+    <li>Quality score checked before final download — aim for B or above (≥ 6.5)</li>
+    <li>LRC generated after generation if lyrics were provided — download alongside audio</li>
+    <li>ComfyUI and MusicWeb services both running before generating</li>
+  </ul>
+
+  <h2 id="appendix">📎 Appendix & Interactive Prompt Builder</h2>
+  <p>Run this Python script in your terminal to generate validated, optimized prompts with automatic syntax checking.</p>
+  
+  <button class="copy-btn" onclick="copyScript(this)">📋 Copy Python Script</button>
+  <pre><code id="python-code">#!/usr/bin/env python3
+"""
+Prompt Architect v1.1
+Interactive CLI tool to generate optimized Tags + Lyrics fields
+"""
+
+import sys
+
+def print_header():
+    print("\n" + "="*60)
+    print(" 🎛️  PROMPT ARCHITECT (v1.5+)")
+    print("="*60 + "\n")
+
+def get_input(prompt, default=""):
+    val = input(f"{prompt} [{default}]: ").strip()
+    return val if val else default
+
+def validate_tags(tags):
+    warnings = []
+    tokens = [t.strip() for t in tags.split(",") if t.strip()]
+    
+    if len(tokens) > 15:
+        warnings.append("⚠️ Too many tags. DiT models perform best with 5-12 focused tokens.")
+        
+    if any("[" in t or "]" in t for t in tokens):
+        warnings.append("⚠️ Brackets belong in the Lyrics field, not Tags.")
+        
+    if "solo" in tags.lower() and any("solo" in t.lower() for t in tokens):
+        warnings.append("💡 Tip: Move [Solo: Instrument] or [Guitar Solo] to Lyrics. Keep only instrument names in Tags.")
+        
+    return warnings
+
+def build_prompt():
+    print_header()
+    
+    print("📌 STEP 1: GLOBAL STYLE TAGS")
+    print("(Comma-separated. Lead instrument + mood + production + era)")
+    tags = get_input("Enter Tags")
+    
+    warnings = validate_tags(tags)
+    for w in warnings:
+        print(w)
+        
+    print("\n📌 STEP 2: SONG STRUCTURE")
+    print("Enter structure line by line. Press Enter on empty line to finish.")
+    print("Use: [Intro], [Verse], [Chorus], [Bridge], [Drop], [Breakdown], etc.")
+    print("Use: (harmonies), UPPERCASE, [Section - Adj], [Vocal: Type]")
+    
+    lyrics_lines = []
+    while True:
+        line = input("Lyrics/Bracket: ").strip()
+        if not line:
+            break
+        lyrics_lines.append(line)
+        
+    lyrics = "\n".join(lyrics_lines)
+    
+    print("\n" + "="*60)
+    print(" ✅ GENERATED PROMPT")
+    print("="*60)
+    print("\n📤 TAGS FIELD:")
+    print(tags)
+    print("\n📝 LYRICS FIELD:")
+    print(lyrics)
+    print("="*60)
+    print("\n💡 Usage Tips:")
+    print("1. Paste Tags into the 'Style/Prompt' box.")
+    print("2. Paste Lyrics into the 'Lyrics' box.")
+    print("3. If a section needs fixing, use Repaint + adjust only that section's tags.")
+    print("4. Add 'virtuosic' to Tags if solos lack detail.")
+    print("="*60 + "\n")
+
+if __name__ == "__main__":
+    try:
+        build_prompt()
+    except KeyboardInterrupt:
+        print("\n\n👋 Prompt generation cancelled.")
+        sys.exit(0)
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+        sys.exit(1)</code></pre>
+
+  <p><strong>🚀 How to Use:</strong><br>
+  1. Save the code as <code>aceuser.py</code><br>
+  2. Run: <code>python3 aceuser.py</code><br>
+  3. Follow prompts. The script validates common mistakes and outputs ready-to-paste fields.</p>
+
+  <footer>
+    <p>🔊 <em>Mastering is about precision in language, not complexity.</em><br>
+    Generated for offline use. Compatible with DiT Architecture</p>
+  </footer>
+
+  <script>
+    function copyScript(btn) {
+      const code = document.getElementById('python-code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = "✅ Copied!";
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = "📋 Copy Python Script";
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
